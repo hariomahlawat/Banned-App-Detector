@@ -19,5 +19,13 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Banned App Detector"
-include(":app")
+rootProject.name = "Banned-App-Detector"
+
+include(
+    ":app",
+    ":core:model",
+    ":core:util",
+    ":core:ui",
+    ":domain",
+    ":data"
+)

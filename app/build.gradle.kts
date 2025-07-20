@@ -1,35 +1,43 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose.compiler)    // NEW for Kotlin 2.x
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.kapt)
 }
 
 android {
     namespace = "com.hariomahlawat.bannedappdetector"
-    compileSdk = 36
-
+    compileSdk = 34
     defaultConfig {
         applicationId = "com.hariomahlawat.bannedappdetector"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
     buildFeatures { compose = true }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
-    }
+    // No composeOptions {}
     kotlinOptions { jvmTarget = "17" }
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
     }
-    buildToolsVersion = "36.0.0"
+}
+
+composeCompiler {
+    // Optional optimisations / reporting
+    enableStrongSkippingMode.set(true)
+    // reportsDestination.set(layout.buildDirectory.dir("compose_compiler"))
 }
 
 dependencies {
+    implementation(project(":core:model"))
+    implementation(project(":core:util"))
+    implementation(project(":core:ui"))
+    implementation(project(":domain"))
+    implementation(project(":data"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -39,15 +47,15 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.navigation)
-    implementation(libs.material)
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.datastore.preferences)
 
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    testImplementation(kotlin("test"))
 }
