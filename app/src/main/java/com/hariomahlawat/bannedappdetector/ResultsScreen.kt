@@ -118,13 +118,13 @@ fun ResultsScreen(
                         Surface(modifier = Modifier.glassCard().fillMaxWidth()) {
                             Column(Modifier.padding(16.dp)) {
                                 Text(
-                                    "Total apps scanned: $total",
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    "Total Apps scanned: $total",
+                                    style = MaterialTheme.typography.bodyLarge,
                                     color = BrandGold
                                 )
                                 Text(
-                                    "Found banned apps: $found",
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    "Banned Apps Found: $found",
+                                    style = MaterialTheme.typography.bodyLarge,
                                     color = BrandGold
                                 )
                                 Text(
@@ -148,6 +148,16 @@ fun ResultsScreen(
                             }
                         }
                     }
+                }
+                item {
+                    Text(
+                        "List of Banned Apps",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 4.dp),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = BrandGold
+                    )
                 }
                 items(state.results) { result ->
                     Surface(
