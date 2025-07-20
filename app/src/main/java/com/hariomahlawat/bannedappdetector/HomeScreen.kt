@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,14 +32,18 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
     HomeContent(
         state = state,
-        onScan = viewModel::onScan
+        onScan = viewModel::onScan,
+        onViewAll = { viewModel.showMonitored(true) },
+        onDismissDialog = { viewModel.showMonitored(false) }
     )
 }
 
 @Composable
 private fun HomeContent(
     state: HomeUiState,
-    onScan: () -> Unit
+    onScan: () -> Unit,
+    onViewAll: () -> Unit,
+    onDismissDialog: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -63,6 +69,10 @@ private fun HomeContent(
                 style = MaterialTheme.typography.bodyMedium
             )
         }
+        Button(
+            onClick = onViewAll,
+            modifier = Modifier.align(Alignment.End)
+        ) { Text("View All Monitored") }
         state.message?.let { msg ->
             Spacer(Modifier.height(8.dp))
             Text(
@@ -72,6 +82,12 @@ private fun HomeContent(
             )
         }
         Spacer(Modifier.height(16.dp))
+        if (state.isScanning) {
+            LinearProgressIndicator(progress = state.progress, modifier = Modifier.fillMaxWidth())
+            Spacer(Modifier.height(8.dp))
+            Text("Found: ${state.foundCount}")
+            Spacer(Modifier.height(8.dp))
+        }
         Button(
             onClick = onScan,
             enabled = !state.isScanning,
@@ -117,6 +133,25 @@ private fun HomeContent(
                 }
                 Divider()
             }
+        }
+        if (state.showMonitoredDialog) {
+            AlertDialog(
+                onDismissRequest = onDismissDialog,
+                confirmButton = {
+                    Button(onClick = onDismissDialog) { Text("Close") }
+                },
+                text = {
+                    Column {
+                        state.summary?.let {
+                            Text("Total monitored: ${it.totalMonitored}")
+                            Spacer(Modifier.height(8.dp))
+                        }
+                        state.monitoredApps.forEach { res ->
+                            Text(res.displayName)
+                        }
+                    }
+                }
+            )
         }
     }
 }
