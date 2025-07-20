@@ -4,7 +4,7 @@ package com.hariomahlawat.bannedappdetector.usecase
 import com.hariomahlawat.bannedappdetector.MonitoredAppMeta
 import com.hariomahlawat.bannedappdetector.MonitoredStatus
 import com.hariomahlawat.bannedappdetector.ScanResult
-import com.hariomahlawat.core.model.*
+import com.hariomahlawat.bannedappdetector.*
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
