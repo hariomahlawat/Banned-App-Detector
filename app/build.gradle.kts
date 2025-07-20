@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.hariomahlawat.bannedappdetector"
-    compileSdk = 36
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.hariomahlawat.bannedappdetector"
