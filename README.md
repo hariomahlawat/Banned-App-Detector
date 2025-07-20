@@ -37,8 +37,5 @@ Install the debug build on a connected device with:
 
 You can also open the project in Android Studio and click **Run** to deploy.
 
-## License
-
-This project is licensed under the [MIT License](LICENSE).
 
 
