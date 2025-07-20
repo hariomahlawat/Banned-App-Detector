@@ -32,9 +32,7 @@ android {
 
 composeCompiler {
     // Optional optimisations / reporting
-    featureFlags {
-        strongSkippingModeEnabled.set(true)
-    }
+    enableStrongSkippingMode.set(true)
     // reportsDestination.set(layout.buildDirectory.dir("compose_compiler"))
 }
 
