@@ -37,15 +37,5 @@ Install the debug build on a connected device with:
 
 You can also open the project in Android Studio and click **Run** to deploy.
 
-## Running Tests
-
-Execute the unit test suite with Gradle:
-
-```
-./gradlew test
-```
-
-The same command is used by the continuous integration workflow and can be
-invoked from Android Studio's Gradle tool window or the command line.
 
 
