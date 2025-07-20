@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.hariomahlawat.bannedappdetector"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.hariomahlawat.bannedappdetector"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -26,6 +26,7 @@ android {
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
     }
+    buildToolsVersion = "36.0.0"
 }
 
 dependencies {
