@@ -44,7 +44,7 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.navigation)
     implementation(libs.hilt.android)
-    //kapt(libs.hilt.compiler)
+    kapt(libs.hilt.compiler)
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.datastore.preferences)
 
