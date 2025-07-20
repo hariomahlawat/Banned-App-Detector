@@ -11,8 +11,8 @@ import androidx.compose.ui.unit.sp
 import com.hariomahlawat.bannedappdetector.R
 
 private val provider = Provider(
-    authority = "com.google.android.gms.fonts",
-    packageName = "com.google.android.gms",
+    providerAuthority = "com.google.android.gms.fonts",
+    providerPackage = "com.google.android.gms",
     certificates = R.array.com_google_android_gms_fonts_certs
 )
 
