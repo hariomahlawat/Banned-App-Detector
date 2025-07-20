@@ -9,7 +9,7 @@ import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.text.googlefonts.GoogleFont.Provider
 import androidx.compose.ui.unit.sp
-import com.hariomahlawat.bannedappdetector.R
+import androidx.compose.ui.text.googlefonts.R
 
 private val provider = Provider(
     authority = "com.google.android.gms.fonts",
