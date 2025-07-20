@@ -7,6 +7,9 @@ import com.hariomahlawat.bannedappdetector.MonitoredAppMeta
 import com.hariomahlawat.bannedappdetector.MonitoredStatus
 import com.hariomahlawat.bannedappdetector.ScanResult
 import com.hariomahlawat.bannedappdetector.repository.ScanResultsRepository
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
