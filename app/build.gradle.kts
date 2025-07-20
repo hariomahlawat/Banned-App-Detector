@@ -20,7 +20,11 @@ android {
     }
     buildFeatures { compose = true }
     // No composeOptions {}
-    kotlinOptions { jvmTarget = "17" }
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
+    }
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
     }
@@ -28,7 +32,9 @@ android {
 
 composeCompiler {
     // Optional optimisations / reporting
-    enableStrongSkippingMode.set(true)
+    featureFlags {
+        strongSkippingModeEnabled.set(true)
+    }
     // reportsDestination.set(layout.buildDirectory.dir("compose_compiler"))
 }
 
