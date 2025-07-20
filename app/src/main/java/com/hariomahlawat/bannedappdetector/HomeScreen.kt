@@ -37,7 +37,10 @@ fun HomeRoot() {
         topBar = { TopAppBar(title = { Text("Banned App Detector") }) },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
-            // OPTION A: text-first variant (supports expanded)
+            ExtendedFloatingActionButton(
+                onClick = vm::onScan,
+                text = { Text(if (state.isScanning) "Scanning..." else "Scan") }
+            )
         }
     ) { padding ->
         Column(

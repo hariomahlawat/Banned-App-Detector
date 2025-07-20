@@ -1,6 +1,6 @@
 # Banned App Detector
 
-Offline Android app that scans for a predefined list of monitored packages (Facebook, Instagram, Truecaller) and reports if each is installed, disabled, or not present.
+Offline Android app that scans for a predefined list of monitored packages (Facebook and its variants such as Messenger and Facebook Lite, Instagram, Truecaller) and reports if each is installed, disabled, or not present.
 
 ## Architecture
 
