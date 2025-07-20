@@ -21,3 +21,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "Banned App Detector"
 include(":app")
+include(":core:model")
+include(":core:util")
+include(":core:ui")
+include(":domain")
+include(":data")
