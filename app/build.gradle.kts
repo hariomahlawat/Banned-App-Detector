@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.hariomahlawat.bannedappdetector"
-    compileSdk = 36
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.hariomahlawat.bannedappdetector"
@@ -51,5 +51,5 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
     debugImplementation(libs.androidx.compose.ui.tooling)
-    implementation(kotlin("test"))
+    testImplementation(kotlin("test"))
 }
