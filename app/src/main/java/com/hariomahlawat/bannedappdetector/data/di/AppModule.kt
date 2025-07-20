@@ -38,7 +38,7 @@ object AppModule {
     fun provideClock(): () -> Long = { System.currentTimeMillis() }
 
     @Provides @Singleton
-    fun monitoredRepo(impl: MonitoredAppsRepositoryImpl): MonitoredAppsRepositoryImpl = impl
+    fun monitoredRepo(impl: MonitoredAppsRepositoryImpl): MonitoredAppsRepository = impl
 
     @Provides @Singleton
     fun scanResultsRepo(impl: ScanResultsRepositoryImpl): ScanResultsRepository = impl

@@ -4,13 +4,8 @@ Offline Android app that scans for a predefined list of monitored packages (Face
 
 ## Architecture
 
-Clean multi module:
-- app (presentation, Hilt entry, Compose UI)
-- core:model (data classes and enums)
-- core:util (utility abstractions)
-- core:ui (design system, theme, reusable components)
-- domain (repository interfaces and use cases)
-- data (implementations, DataStore persistence, DI modules)
+Originally planned as a multi module project, the sample has been collapsed into
+a single `app` module for simplicity.
 
 ## How It Works
 
