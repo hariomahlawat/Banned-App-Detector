@@ -1,0 +1,6 @@
+<resources>
+    <array name="com_google_android_gms_fonts_certs">
+        <item>MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsamplecertificate1</item>
+        <item>MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsamplecertificate2</item>
+    </array>
+</resources>
