@@ -3,6 +3,7 @@ package com.hariomahlawat.bannedappdetector.store
 
 
 import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import com.hariomahlawat.bannedappdetector.MonitoredAppMeta
 import com.hariomahlawat.bannedappdetector.MonitoredStatus
 import com.hariomahlawat.bannedappdetector.ScanResult
@@ -24,7 +25,7 @@ private val KEY_JSON = stringPreferencesKey("results_json")
 
 @Singleton
 class ScanResultsRepositoryImpl @Inject constructor(
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) : ScanResultsRepository {
 
     override fun scanResultsFlow(): Flow<List<ScanResult>> =
