@@ -64,7 +64,7 @@ private fun HomeContent(
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                "Precision Scan for Restricted Apps",
+                "Precision Scan for Banned Apps",
                 style = MaterialTheme.typography.headlineMedium,
                 color = BrandGold,
                 textAlign = TextAlign.Center
