@@ -1,9 +1,12 @@
 package com.hariomahlawat.bannedappdetector
 
-import HomeScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.Composable
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import com.hariomahlawat.bannedappdetector.ui.theme.BannedAppDetectorTheme
 
@@ -13,8 +16,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             BannedAppDetectorTheme {
-                HomeScreen()
+                AppNavigation()
             }
         }
+    }
+}
+
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController()
+    NavHost(navController, startDestination = "home") {
+        composable("home") { HomeScreen(onViewResults = { navController.navigate("results") }) }
+        composable("results") { ResultsScreen(onBack = { navController.popBackStack() }) }
     }
 }
