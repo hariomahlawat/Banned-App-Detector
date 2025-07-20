@@ -1,108 +1,54 @@
-package com.hariomahlawat.bannedappdetector
-
-import android.content.Intent
-import android.provider.Settings
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.hariomahlawat.bannedappdetector.components.StatusChip
-import java.text.DateFormat
-import java.util.Date
-import androidx.core.net.toUri
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeRoot() {
-    val vm: HomeViewModel = hiltViewModel()
-    val state by vm.state.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    LaunchedEffect(state.message) {
-        state.message?.let {
-            snackbarHostState.showSnackbar(it)
-            vm.dismissMessage()
-        }
-    }
-
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("Banned App Detector") }) },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = vm::onScan,
-                text = { Text(if (state.isScanning) "Scanning..." else "Scan") }
-            )
-        }
-    ) { padding ->
-        Column(
-            Modifier
-                .padding(padding)
-                .fillMaxSize()
+private fun HomeRoot(
+    onScan: () -> Unit,
+    isScanning: Boolean
+) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            "Scan your device to detect monitored apps",
+            style = MaterialTheme.typography.titleMedium
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            "Tap the Scan button below. We will check only the predefined list; nothing leaves your device.",
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Spacer(Modifier.height(24.dp))
+        Button(
+            onClick = onScan,
+            enabled = !isScanning
         ) {
-            SummaryCard(state)
-            Spacer(Modifier.height(8.dp))
-            ResultsList(state.results)
-        }
-    }
-}
-
-@Composable
-private fun SummaryCard(state: HomeUiState) {
-    Card(Modifier.padding(12.dp).fillMaxWidth()) {
-        Column(Modifier.padding(16.dp)) {
-            Text("Summary", style = MaterialTheme.typography.titleMedium)
-            val s = state.summary
-            if (s == null) {
-                Text("No scans yet")
-            } else {
-                Text("Total monitored: ${s.totalMonitored}")
-                Text("Installed enabled: ${s.installedEnabled}")
-                Text("Installed disabled: ${s.installedDisabled}")
-                Text("Not installed: ${s.notInstalled}")
+            if (isScanning) {
+                CircularProgressIndicator(
+                    strokeWidth = 2.dp,
+                    modifier = Modifier
+                        .size(18.dp)
+                        .padding(end = 8.dp)
+                )
             }
-            state.lastScanAt?.let {
-                val text = DateFormat.getDateTimeInstance()
-                    .format(Date(it))
-                Text("Last scan: $text")
-            }
-        }
-    }
-}
-
-@Composable
-private fun ResultsList(results: List<ScanResult>) {
-    val context = LocalContext.current
-    LazyColumn(Modifier.fillMaxSize()) {
-        items(results, key = { it.meta.packageName }) { r ->
-            ListItem(
-                headlineContent = {
-                    Text(r.meta.displayName, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                },
-                supportingContent = {
-                    Text(r.meta.packageName, style = MaterialTheme.typography.labelSmall)
-                },
-                trailingContent = { StatusChip(r.status) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        val intent = Intent(
-                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                            "package:${r.meta.packageName}".toUri()
-                        )
-                        context.startActivity(intent)
-                    }
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            )
-            HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
+            Text(if (isScanning) "Scanning..." else "Scan Now")
         }
     }
 }
