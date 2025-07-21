@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hariomahlawat.bannedappdetector.components.StatusChip
+import com.hariomahlawat.bannedappdetector.components.ScanProgressBar
 import com.hariomahlawat.bannedappdetector.util.getDeviceInfo
 import com.hariomahlawat.bannedappdetector.util.saveToCache
 import com.hariomahlawat.bannedappdetector.util.shareImage
@@ -148,6 +149,9 @@ fun ResultsScreen(
                             }
                         }
                     }
+                }
+                item {
+                    ScanProgressBar(bannedApps = state.results, onScanFinished = {})
                 }
                 item {
                     Text(
