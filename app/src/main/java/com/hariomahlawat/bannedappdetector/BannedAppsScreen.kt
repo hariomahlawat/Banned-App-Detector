@@ -1,0 +1,226 @@
+/*
+ * Copyright Ⓒ 2025 Hariom Ahlawat
+ * UI screen that shows the Indian‑Army banned‑apps catalogue.
+ */
+
+package com.hariomahlawat.bannedappdetector
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientEnd
+import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
+import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
+import kotlinx.coroutines.launch
+
+/* ---------- public entry ---------- */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BannedAppsScreen(
+    onBack: () -> Unit
+) {
+    val searchQuery = remember { mutableStateOf("") }
+    val listState   = rememberLazyListState()
+    val scope       = rememberCoroutineScope()
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Army Banned Apps") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+            )
+        },
+        floatingActionButton = {
+            val showFab by remember {
+                derivedStateOf { listState.firstVisibleItemIndex > 0 }
+            }
+            if (showFab) {
+                FloatingActionButton(
+                    onClick = { scope.launch { listState.animateScrollToItem(0) } }
+                ) {
+                    Icon(Icons.Default.ArrowUpward, contentDescription = "Scroll to top")
+                }
+            }
+        },
+        containerColor = Color.Transparent
+    ) { padding ->
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Brush.verticalGradient(listOf(BgGradientStart, BgGradientEnd)))
+                .padding(padding)
+        ) {
+
+            SearchBar(
+                value = searchQuery.value,
+                onValueChange = { searchQuery.value = it }
+            )
+
+            Spacer(Modifier.height(4.dp))
+
+            BannedAppsList(
+                buckets      = bannedAppsAZ,
+                query        = searchQuery.value,
+                listState    = listState
+            )
+        }
+    }
+}
+
+/* ---------- search field ---------- */
+@Composable
+private fun SearchBar(value: String, onValueChange: (String) -> Unit) {
+    Surface(
+        shape = MaterialTheme.shapes.large,
+        color = Color.White.copy(alpha = .12f),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+        ) {
+            Icon(Icons.Default.Search, null, tint = BrandGold)
+            Spacer(Modifier.width(8.dp))
+            BasicTextField(
+                value         = value,
+                onValueChange = onValueChange,
+                singleLine    = true,
+                textStyle     = TextStyle(
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 16.sp
+                ),
+                modifier      = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+/* ---------- list ---------- */
+@Composable
+private fun BannedAppsList(
+    buckets: Map<Char, List<String>>,
+    query: String,
+    listState: LazyListState
+) {
+    LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+        buckets
+            .filterKeys { key -> buckets[key]!!.any { it.contains(query, true) } }
+            .toSortedMap()
+            .forEach { (letter, apps) ->
+
+                stickyHeader {
+                    Surface(tonalElevation = 2.dp, modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text   = letter.toString(),
+                            color  = BrandGold,
+                            style  = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.padding(start = 20.dp, top = 6.dp, bottom = 6.dp)
+                        )
+                    }
+                }
+
+                items(apps.filter { it.contains(query, true) }) { app ->
+                    ListItem(
+                        leadingContent = {
+                            Icon(
+                                Icons.Default.Block,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = Color(0xFFE53935)
+                            )
+                        },
+                        headlineContent = { Text(app) }
+                    )
+                    Divider(thickness = .5.dp, color = Color.White.copy(.12f))
+                }
+            }
+    }
+}
+
+/* ---------- static data ---------- */
+private val bannedAppsAZ: Map<Char, List<String>> = listOf(
+    // A
+    "AliExpress", "AliPay", "APUS Browser", "APUS Launcher", "Azar",
+    // B
+    "Baidu Map", "Baidu Translate", "Badoo", "Banggood", "BeautyPlus", "BeautyPlus Me",
+    "BeautyCam", "Bigo Live", "Likee", "Vigo Video", "Bumble",
+    // C
+    "CamScanner", "CamScanner HD", "CamScanner Lite", "Club Factory",
+    "Clean Master", "CM Browser", "CM Security", "CM Lite", "Coffee Meets Bagel",
+    "Couchsurfing", "Clash of Kings",
+    // D
+    "Dailyhunt", "DU Battery Saver", "DU Cleaner", "DU Recorder", "DU Privacy", "DU Browser",
+    // E
+    "Ello", "ES File Explorer",
+    // F
+    "Facebook", "Facebook Lite", "Messenger", "Pages Manager", "Meta Ads Manager",
+    "FriendsFeed",
+    // G
+    "Gearbest",
+    // H
+    "Happn", "Helo", "Hike", "Hinge", "Hungama Music",
+    // I
+    "IMO", "Instagram", "Threads", "Layout", "Boomerang",
+    // K
+    "Kwai",
+    // L
+    "Line", "LiveMe",
+    // M
+    "Mi Store", "Mi Community", "Mi Video Call", "Mi Browser", "GetApps",
+    "Modlily",
+    // N
+    "Nimbuzz", "NONO Live", "NewsDog",
+    // O
+    "OkCupid",
+    // P
+    "Parallel Space", "POPxo", "Pratilipi", "PUBG Mobile", "PUBG Mobile Lite",
+    "PUBG NEW STATE", "Arena Breakout", "Call of Duty Mobile",
+    // Q
+    "QQ", "QQ Music", "QQ Mail", "QQ Player", "QQ Browser", "WeSync", "Qzone",
+    // R
+    "Reddit", "Romwe", "Rosegal",
+    // S
+    "SHAREit", "SHAREit Lite", "Shein", "Snow", "Snapchat", "Songs.pk", "SoundHound",
+    // T
+    "TikTok", "TikTok Lite", "CapCut", "Lemon8", "Tantan", "ToTok", "Truecaller",
+    "Truecaller Lite", "Tumblr", "Tinder", "Tinder Lite", "TrulyMadly",
+    // U
+    "UC Browser", "UC Browser Mini", "UC Turbo", "UC News", "Uplive",
+    // V
+    "Viber", "Vigo Video", "Vimo", "Vmate", "VivaVideo", "VivaVideo Editor",
+    "Vokal", "Vault-Hide",
+    // W
+    "WeChat", "WeChat Work", "WeChat Lite", "Weibo", "Wonder Camera", "PhotoWonder", "Woo",
+    // X
+    "Xender",
+    // Y
+    "Yelp",
+    // Z
+    "Zoom"
+).groupBy { it.first().uppercaseChar() }

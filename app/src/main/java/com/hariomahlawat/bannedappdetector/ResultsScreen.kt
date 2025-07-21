@@ -2,49 +2,37 @@ package com.hariomahlawat.bannedappdetector
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Surface
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.view.drawToBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hariomahlawat.bannedappdetector.components.StatusChip
+import com.hariomahlawat.bannedappdetector.ui.theme.*
+import com.hariomahlawat.bannedappdetector.util.DeviceInfo
 import com.hariomahlawat.bannedappdetector.util.getDeviceInfo
 import com.hariomahlawat.bannedappdetector.util.saveToCache
 import com.hariomahlawat.bannedappdetector.util.shareImage
-import androidx.core.view.drawToBitmap
-import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientEnd
-import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
-import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
-import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
 import java.text.DateFormat
-import java.util.Date
+import java.util.*
+
+private val ErrorRed = Color(0xFFE53935)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,141 +42,230 @@ fun ResultsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
-    val view = LocalView.current
-    val deviceInfo = getDeviceInfo(context)
+    val view    = LocalView.current
+    val device  = getDeviceInfo(context)
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Scan Results") },
+                title = { Text("Scan Results", style = MaterialTheme.typography.headlineSmall) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            painterResource(android.R.drawable.ic_menu_close_clear_cancel),
+                            painter = painterResource(android.R.drawable.ic_menu_close_clear_cancel),
                             contentDescription = "Back"
                         )
                     }
                 },
                 actions = {
-                    IconButton(onClick = {
-                        val bitmap = view.drawToBitmap()
-                        val uri = bitmap.saveToCache(context)
-                        shareImage(context, uri)
-                    }) {
+                    IconButton(
+                        onClick = {
+                            view.drawToBitmap()
+                                .saveToCache(context)
+                                .let { shareImage(context, it) }
+                        }
+                    ) {
                         Icon(
-                            painterResource(android.R.drawable.ic_menu_share),
+                            painter = painterResource(android.R.drawable.ic_menu_share),
                             contentDescription = "Share"
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
         containerColor = Color.Transparent
     ) { padding ->
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(listOf(BgGradientStart, BgGradientEnd))
-                )
+                .background(Brush.verticalGradient(listOf(BgGradientStart, BgGradientEnd)))
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-                item {
-                    val total = state.summary?.totalMonitored ?: 0
-                    val found = state.results.size
-                    val scanTime = state.lastScanAt?.let {
-                        DateFormat.getDateTimeInstance().format(Date(it))
-                    } ?: "--"
+            ResultsBody(
+                state          = state,
+                deviceInfo     = device,
+                contentPadding = padding
+            )
+        }
+    }
+}
 
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.archer_logo),
-                            contentDescription = null,
-                            modifier = Modifier.size(100.dp)
-                        )
-                        Spacer(Modifier.height(16.dp))
-                        Surface(modifier = Modifier.glassCard(Color.Black.copy(alpha = 0.45f)).fillMaxWidth()) {
-                            Column(Modifier.padding(16.dp)) {
-                                Text(
-                                    "Total Apps scanned: $total",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = BrandGold
-                                )
-                                Text(
-                                    "Banned Apps Found: $found",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = BrandGold
-                                )
-                                Text(
-                                    "Scan time: $scanTime",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = BrandGold
-                                )
-                                Spacer(Modifier.size(8.dp))
-                                Text(
-                                    "Device: ${'$'}{deviceInfo.manufacturer} ${'$'}{deviceInfo.model}",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                                Text(
-                                    "Android ID: ${'$'}{deviceInfo.androidId}",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                                Text(
-                                    "OS: ${'$'}{deviceInfo.osVersion}",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        }
-                    }
-                }
-                item {
-                    Text(
-                        "List of Banned Apps",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 4.dp),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = BrandGold
-                    )
-                }
-                items(state.results) { result ->
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .glassCard(Color.Black.copy(alpha = 0.45f))
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Column(Modifier.weight(1f)) {
-                                Text(
-                                    result.meta.displayName,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = BrandGold
-                                )
-                                Text(
-                                    result.meta.packageName,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                            StatusChip(status = result.status)
-                        }
-                    }
-                }
+/* ---------- list + header ---------- */
+@Composable
+private fun ResultsBody(
+    state: HomeUiState,
+    deviceInfo: DeviceInfo,
+    contentPadding: PaddingValues
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(contentPadding)
+    ) {
+        item {
+            Spacer(Modifier.height(24.dp))
+
+            val total   = state.summary?.totalMonitored ?: 0
+            val banned  = state.results.size
+            val scanned = state.lastScanAt?.let {
+                DateFormat.getDateTimeInstance().format(Date(it))
+            } ?: "--"
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier            = Modifier.fillMaxWidth()
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.archer_logo),
+                    contentDescription = null,
+                    modifier = Modifier.size(96.dp)
+                )
+
+                Spacer(Modifier.height(16.dp))
+
+                SummaryCard(
+                    total      = total,
+                    banned     = banned,
+                    scanTime   = scanned,
+                    deviceInfo = deviceInfo
+                )
             }
         }
+
+        stickyHeader {
+            Text(
+                "Detected Banned Apps",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(vertical = 6.dp, horizontal = 20.dp),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        items(state.results) { result ->
+            BannedAppRow(result)
+        }
+
+        item { Spacer(Modifier.height(48.dp)) }
+    }
+}
+
+/* ---------- summary card ---------- */
+@Composable
+private fun SummaryCard(
+    total: Int,
+    banned: Int,
+    scanTime: String,
+    deviceInfo: DeviceInfo
+) {
+    Surface(
+        modifier = Modifier
+            .glassCard(Color.Black.copy(alpha = .45f))
+            .fillMaxWidth(),
+        tonalElevation = 1.dp
+    ) {
+        Column(Modifier.padding(16.dp)) {
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                MetricTile(
+                    value  = banned.toString(),
+                    label  = "BANNED",
+                    icon   = Icons.Default.Warning,
+                    tint   = ErrorRed,
+                    modifier = Modifier.weight(1f)
+                )
+                MetricTile(
+                    value  = total.toString(),
+                    label  = "SCANNED",
+                    icon   = Icons.Default.Inbox,
+                    tint   = BrandGold,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(Modifier.height(12.dp))
+            Text("Scan time: $scanTime", style = MaterialTheme.typography.bodyMedium)
+            Spacer(Modifier.height(8.dp))
+            HorizontalDivider()
+            Spacer(Modifier.height(8.dp))
+
+            Text("Device  : ${deviceInfo.manufacturer} ${deviceInfo.model}",
+                style = MaterialTheme.typography.bodySmall)
+            Text("Android ID: ${deviceInfo.androidId}",
+                style = MaterialTheme.typography.bodySmall)
+            Text("OS      : ${deviceInfo.osVersion}",
+                style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
+
+/* ---------- metric tile ---------- */
+@Composable
+private fun MetricTile(
+    value: String,
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    tint: Color,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(MaterialTheme.shapes.medium)
+            .background(Color.White.copy(alpha = .12f))
+            .padding(horizontal = 12.dp, vertical = 10.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = tint
+        )
+        Spacer(Modifier.width(6.dp))
+        Column {
+            Text(value, style = MaterialTheme.typography.bodyLarge, color = tint)
+            Text(label, style = MaterialTheme.typography.labelMedium)
+        }
+    }
+}
+
+/* ---------- list row ---------- */
+@Composable
+private fun BannedAppRow(result: ScanResult) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .glassCard(Color.Black.copy(alpha = .40f))
+    ) {
+        ListItem(
+            leadingContent = {
+                Icon(
+                    imageVector = Icons.Default.Block,
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp),
+                    tint = ErrorRed
+                )
+            },
+            headlineContent = {
+                Text(
+                    result.meta.displayName,
+                    color = BrandGold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            supportingContent = {
+                Text(result.meta.packageName, style = MaterialTheme.typography.bodySmall)
+            },
+            trailingContent = { StatusChip(result.status) },
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+        )
     }
 }

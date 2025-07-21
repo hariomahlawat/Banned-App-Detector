@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.androidx.compose.navigation)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.media3.common.ktx)
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.datastore.preferences)
