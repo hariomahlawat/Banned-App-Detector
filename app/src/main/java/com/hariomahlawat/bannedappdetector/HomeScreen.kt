@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Shield
@@ -156,8 +155,7 @@ private fun HomeContent(
 /* ---------- 3. Trust chips ---------- */
 @Composable
 private fun TrustChipsRow() {
-    val chipBg = if (isSystemInDarkTheme())
-        Color.White.copy(alpha = 0.24f) else Color.White.copy(alpha = 0.12f)
+    val chipBg = Color.White.copy(alpha = 0.24f)
     val chipModifier = Modifier
         .padding(horizontal = 4.dp)
         .clip(RoundedCornerShape(50))
@@ -176,7 +174,11 @@ private fun TrustChipsRow() {
             Row(chipModifier, verticalAlignment = Alignment.CenterVertically) {
                 Icon(icon, contentDescription = null, tint = SuccessGreen, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(4.dp))
-                Text(label, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             }
         }
     }
