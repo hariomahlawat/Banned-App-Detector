@@ -23,6 +23,7 @@ import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientEnd
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
 import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
+import com.hariomahlawat.bannedappdetector.components.ScanProgressBar
 import java.text.DateFormat
 import java.util.Date
 
@@ -32,13 +33,19 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    HomeContent(state = state, onScan = viewModel::onScan, onViewResults = onViewResults)
+    HomeContent(
+        state = state,
+        onScan = viewModel::onScan,
+        onScanFinished = viewModel::onScanAnimationFinished,
+        onViewResults = onViewResults
+    )
 }
 
 @Composable
 private fun HomeContent(
     state: HomeUiState,
     onScan: () -> Unit,
+    onScanFinished: () -> Unit,
     onViewResults: () -> Unit
 ) {
     Box(
@@ -79,7 +86,16 @@ private fun HomeContent(
             Button(onClick = onScan) {
                 Text(if (state.isScanning) "Scanning..." else "Scan Now")
             }
-            Spacer(Modifier.height(24.dp))
+            if (state.isScanning) {
+                Spacer(Modifier.height(16.dp))
+                ScanProgressBar(
+                    bannedApps = state.results.map { it.meta.displayName },
+                    onScanFinished = onScanFinished
+                )
+                Spacer(Modifier.height(24.dp))
+            } else {
+                Spacer(Modifier.height(24.dp))
+            }
             state.summary?.let { summary ->
                 Surface(modifier = Modifier.glassCard().fillMaxWidth()) {
                     Column(Modifier.padding(16.dp)) {
