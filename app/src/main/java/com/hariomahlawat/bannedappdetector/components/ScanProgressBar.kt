@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -101,10 +102,20 @@ fun ScanProgressBar(
         /* scan log */
         when {
             triggered.isNotEmpty() ->
-                triggered.forEach { Text("⚠️  $it is banned", color = Color.Red) }
+                triggered.forEach {
+                    Text(
+                        text = "⚠️  $it is banned",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
 
             progress.value == 1f ->
-                Text("✅  No banned apps found", color = Color(0xFF4CAF50))
+                Text(
+                    text = "✅  No banned apps found",
+                    color = Color(0xFF4CAF50),
+                    style = MaterialTheme.typography.titleMedium
+                )
         }
     }
 }
