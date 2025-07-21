@@ -38,7 +38,6 @@ import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientEnd
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
 import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
-import com.hariomahlawat.bannedappdetector.SummaryStats
 import java.text.DateFormat
 import java.util.Date
 
