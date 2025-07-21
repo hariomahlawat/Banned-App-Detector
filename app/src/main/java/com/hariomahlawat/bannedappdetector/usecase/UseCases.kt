@@ -1,7 +1,8 @@
 package com.hariomahlawat.bannedappdetector.usecase
 
 import android.content.pm.PackageManager
-import android.content.pm.PackageManager.NameNotFoundException
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import com.hariomahlawat.bannedappdetector.MonitoredStatus
 import com.hariomahlawat.bannedappdetector.ScanResult
 import com.hariomahlawat.bannedappdetector.SummaryStats
@@ -19,12 +20,24 @@ class ScanMonitoredAppsUseCase(
 ) {
     suspend operator fun invoke(): List<ScanResult> = withContext(io) {
         val now = clock()
+        val installed: List<Pair<PackageInfo, ApplicationInfo>> =
+            pm.getInstalledPackages(0).map { pkg ->
+                pkg to pkg.applicationInfo
+            }
+
         val results = monitoredAppsRepository.getMonitoredApps().map { meta ->
-            try {
-                val appInfo = pm.getApplicationInfo(meta.packageName, 0)
-                val pkgInfo = pm.getPackageInfo(meta.packageName, 0)
-                val status = if (appInfo.enabled) MonitoredStatus.INSTALLED_ENABLED
-                else MonitoredStatus.INSTALLED_DISABLED
+            val match = installed.find { (_, info) ->
+                val label = pm.getApplicationLabel(info).toString()
+                label.equals(meta.displayName, ignoreCase = true)
+            }
+
+            if (match != null) {
+                val (pkgInfo, appInfo) = match
+                val status = if (appInfo.enabled) {
+                    MonitoredStatus.INSTALLED_ENABLED
+                } else {
+                    MonitoredStatus.INSTALLED_DISABLED
+                }
                 ScanResult(
                     meta = meta,
                     status = status,
@@ -34,7 +47,7 @@ class ScanMonitoredAppsUseCase(
                     lastUpdateTime = pkgInfo.lastUpdateTime,
                     scannedAt = now
                 )
-            } catch (_: NameNotFoundException) {
+            } else {
                 ScanResult(meta, MonitoredStatus.NOT_INSTALLED, scannedAt = now)
             }
         }
