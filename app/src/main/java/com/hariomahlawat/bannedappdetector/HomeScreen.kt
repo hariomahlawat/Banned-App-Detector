@@ -37,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientEnd
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
 import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
+import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
 import java.text.DateFormat
 import java.util.Date
@@ -169,7 +170,7 @@ private fun TrustChipsRow() {
             "Play Protect OK" to Icons.Filled.VerifiedUser
         ).forEach { (label, icon) ->
             Row(chipModifier, verticalAlignment = Alignment.CenterVertically) {
-                Icon(icon, contentDescription = null, tint = BrandGold, modifier = Modifier.size(16.dp))
+                Icon(icon, contentDescription = null, tint = SuccessGreen, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(4.dp))
                 Text(label, style = MaterialTheme.typography.bodySmall)
             }
