@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +37,8 @@ import com.hariomahlawat.bannedappdetector.util.BeepPlayer
 import com.hariomahlawat.bannedappdetector.ui.theme.NeutralGrey
 import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
 import kotlin.random.Random
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun ScanProgressBar(
@@ -126,15 +129,35 @@ private fun BoxScope.DangerBubble(
     icon: ImageVector,
     xOffsetDp: Dp                           // explicit offset passed in
 ) {
-    Icon(
-        icon,
-        contentDescription = null,
-        tint = Color.Red,
-        modifier = Modifier
-            .size(24.dp)
-            .offset(x = xOffsetDp - 12.dp) // centre icon on the hit
-            .graphicsLayer {
-                scaleX = 1.2f; scaleY = 1.2f    // little “pop”
+    var visible by remember { mutableStateOf(true) }
+
+    if (visible) {
+        val y       = remember { Animatable(0f) }
+        val scale   = remember { Animatable(0.2f) }
+        val alpha   = remember { Animatable(1f) }
+
+        LaunchedEffect(Unit) {
+            launch { y.animateTo(-24f, tween(600)) }
+            launch { scale.animateTo(1.2f, tween(300)) }
+            launch {
+                delay(300)
+                alpha.animateTo(0f, tween(300))
+                visible = false
             }
-    )
+        }
+
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = Color.Red,
+            modifier = Modifier
+                .size(24.dp)
+                .offset(x = xOffsetDp - 12.dp, y = y.value.dp) // centre on hit
+                .graphicsLayer {
+                    scaleX = scale.value
+                    scaleY = scale.value
+                    this.alpha = alpha.value
+                }
+        )
+    }
 }
