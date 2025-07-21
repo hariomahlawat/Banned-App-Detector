@@ -8,7 +8,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
 
-fun Modifier.glassCard() = this
+fun Modifier.glassCard(scrim: Color = Color.Transparent) = this
     .clip(RoundedCornerShape(24.dp))
+    .background(scrim)
     .background(Color.White.copy(alpha = 0.08f))
     .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(24.dp))
