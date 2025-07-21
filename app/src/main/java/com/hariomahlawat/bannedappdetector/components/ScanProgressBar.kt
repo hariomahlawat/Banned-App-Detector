@@ -33,6 +33,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hariomahlawat.bannedappdetector.util.BeepPlayer
+import com.hariomahlawat.bannedappdetector.ui.theme.NeutralGrey
+import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
 import kotlin.random.Random
 
 @Composable
@@ -54,26 +56,25 @@ fun ScanProgressBar(
         progress.animateTo(
             targetValue   = 1f,
             animationSpec = tween(durationMillis = 4_000)
-        ) {         // this lambda has Animatable as **receiver**
-            // `value` is current progress inside the receiver scope
-            hits.firstOrNull { it.second <= value }?.let { (app, _) ->
-                if (app !in triggered) {
+        ) {
+            // trigger all hits whose threshold is reached
+            hits.filter { it.second <= value && it.first !in triggered }
+                .forEach { (app, _) ->
                     triggered += app
                     BeepPlayer.beep()
                 }
-            }
         }
         onScanFinished()
     }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         /* ---------- progress track ---------- */
-        BoxWithConstraints(                                 // <— changed
+        BoxWithConstraints(
             Modifier
                 .fillMaxWidth(0.9f)
                 .height(6.dp)
                 .clip(RoundedCornerShape(3.dp))
-                .background(if (triggered.isEmpty()) Color(0xFF4CAF50) else Color.Gray)
+                .background(NeutralGrey.copy(alpha = 0.3f))
         ) {
             /* moving bar */
             Box(
@@ -81,7 +82,7 @@ fun ScanProgressBar(
                     .fillMaxHeight()
                     .fillMaxWidth(progress.value)
                     .background(
-                        if (triggered.isEmpty()) Color(0xFF4CAF50) else Color.Red
+                        if (triggered.isEmpty()) SuccessGreen else Color.Red
                     )
             )
 
