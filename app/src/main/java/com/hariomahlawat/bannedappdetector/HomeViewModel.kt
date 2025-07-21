@@ -8,7 +8,6 @@ import com.hariomahlawat.bannedappdetector.usecase.ScanMonitoredAppsUseCase
 import com.hariomahlawat.bannedappdetector.repository.MonitoredAppsRepository
 import com.hariomahlawat.bannedappdetector.MonitoredStatus
 import com.hariomahlawat.bannedappdetector.MonitoredAppMeta
-import kotlinx.coroutines.delay
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -61,26 +60,27 @@ class HomeViewModel @Inject constructor(
             val allResults = scan()
             val installed = allResults.filter { it.status != MonitoredStatus.NOT_INSTALLED }
             val summary = summaryUseCase(allResults)
-            installed.forEachIndexed { index, result ->
-                kotlinx.coroutines.delay(300)
-                _state.update {
-                    it.copy(
-                        results = it.results + result,
-                        progress = (index + 1f) / installed.size.coerceAtLeast(1),
-                        foundCount = index + 1
-                    )
-                }
-            }
-            kotlinx.coroutines.delay(300)
             _state.update {
                 it.copy(
-                    isScanning = false,
-                    progress = 1f,
+                    results = installed,
                     summary = summary,
-                    lastScanAt = allResults.firstOrNull()?.scannedAt,
-                    message = "Scan complete: ${summary.installedEnabled} enabled, ${summary.installedDisabled} disabled"
+                    lastScanAt = allResults.firstOrNull()?.scannedAt
                 )
             }
+        }
+    }
+
+    fun onScanAnimationFinished() {
+        val summary = _state.value.summary
+        _state.update { current ->
+            current.copy(
+                isScanning = false,
+                progress = 1f,
+                foundCount = current.results.size,
+                message = summary?.let {
+                    "Scan complete: ${it.installedEnabled} enabled, ${it.installedDisabled} disabled"
+                }
+            )
         }
     }
 
