@@ -1,3 +1,5 @@
+package com.hariomahlawat.bannedappdetector.components
+
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
