@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -48,6 +49,7 @@ import java.util.Date
 @Composable
 fun HomeScreen(
     onViewResults: () -> Unit,
+    onViewBannedApps: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -69,6 +71,7 @@ fun HomeScreen(
             onScan           = viewModel::onScan,
             onScanFinished   = viewModel::onScanAnimationFinished,
             onViewResults    = onViewResults,
+            onViewBannedApps = onViewBannedApps,
             modifier         = Modifier.padding(padding)   // scaffold inset
         )
     }
@@ -81,6 +84,7 @@ private fun HomeContent(
     onScan: () -> Unit,
     onScanFinished: () -> Unit,
     onViewResults: () -> Unit,
+    onViewBannedApps: () -> Unit,
     modifier: Modifier = Modifier            // new param
 ) {
     Box(
@@ -121,6 +125,10 @@ private fun HomeContent(
                 textAlign = TextAlign.Center,
                 modifier  = Modifier.padding(top = 4.dp, bottom = 20.dp)
             )
+
+            TextButton(onClick = onViewBannedApps) {
+                Text("Browse Army Banned Apps")
+            }
 
             /* ---------- trust / privacy chips ---------- */
             TrustChipsRow()
