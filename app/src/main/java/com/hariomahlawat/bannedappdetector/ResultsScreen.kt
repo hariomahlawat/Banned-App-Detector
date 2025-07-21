@@ -115,7 +115,7 @@ fun ResultsScreen(
                             modifier = Modifier.size(100.dp)
                         )
                         Spacer(Modifier.height(16.dp))
-                        Surface(modifier = Modifier.glassCard().fillMaxWidth()) {
+                        Surface(modifier = Modifier.glassCard(Color.Black.copy(alpha = 0.45f)).fillMaxWidth()) {
                             Column(Modifier.padding(16.dp)) {
                                 Text(
                                     "Total Apps scanned: $total",
@@ -164,7 +164,7 @@ fun ResultsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .glassCard()
+                            .glassCard(Color.Black.copy(alpha = 0.45f))
                     ) {
                         Row(
                             modifier = Modifier

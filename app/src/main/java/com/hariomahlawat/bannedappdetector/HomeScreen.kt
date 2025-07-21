@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Shield
@@ -38,6 +39,7 @@ import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientEnd
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
 import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
 import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
+import com.hariomahlawat.bannedappdetector.ui.theme.NeutralGrey
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
 import java.text.DateFormat
 import java.util.Date
@@ -116,7 +118,7 @@ private fun HomeContent(
             Text(
                 "Local analysis. Targeted detection.",
                 style     = MaterialTheme.typography.titleMedium,
-                color     = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
+                color     = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.92f),
                 textAlign = TextAlign.Center,
                 modifier  = Modifier.padding(top = 4.dp, bottom = 20.dp)
             )
@@ -154,10 +156,12 @@ private fun HomeContent(
 /* ---------- 3. Trust chips ---------- */
 @Composable
 private fun TrustChipsRow() {
+    val chipBg = if (isSystemInDarkTheme())
+        Color.White.copy(alpha = 0.24f) else Color.White.copy(alpha = 0.12f)
     val chipModifier = Modifier
         .padding(horizontal = 4.dp)
         .clip(RoundedCornerShape(50))
-        .background(Color.White.copy(alpha = 0.12f))
+        .background(chipBg)
         .padding(horizontal = 12.dp, vertical = 4.dp)
 
     Row(
@@ -187,7 +191,7 @@ private fun SummaryCard(
 ) {
     Surface(
         modifier = Modifier
-            .glassCard()
+            .glassCard(Color.Black.copy(alpha = 0.45f))
             .fillMaxWidth()
             .semantics { heading() }          // accessibility
     ) {
@@ -197,7 +201,7 @@ private fun SummaryCard(
                     lastScanAt?.let { DateFormat.getDateTimeInstance().format(Date(it)) } ?: "--"
                 }",
                 style = MaterialTheme.typography.titleSmall,
-                color = BrandGold
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(8.dp))
             Row(
@@ -206,11 +210,13 @@ private fun SummaryCard(
             ) {
                 Text(
                     "Banned apps found: ${summary.installedEnabled}",
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = BrandGold
                 )
                 Text(
                     "Disabled: ${summary.installedDisabled}",
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = NeutralGrey
                 )
             }
             Spacer(Modifier.height(12.dp))
