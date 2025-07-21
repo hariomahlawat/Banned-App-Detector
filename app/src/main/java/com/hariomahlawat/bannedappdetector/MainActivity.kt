@@ -26,7 +26,17 @@ class MainActivity : ComponentActivity() {
 fun AppNavigation() {
     val navController = rememberNavController()
     NavHost(navController, startDestination = "home") {
-        composable("home") { HomeScreen(onViewResults = { navController.navigate("results") }) }
-        composable("results") { ResultsScreen(onBack = { navController.popBackStack() }) }
+        composable("home") {
+            HomeScreen(
+                onViewResults    = { navController.navigate("results") },
+                onViewBannedApps = { navController.navigate("bannedApps") }
+            )
+        }
+        composable("results") {
+            ResultsScreen(onBack = { navController.popBackStack() })
+        }
+        composable("bannedApps") {
+            BannedAppsScreen(onBack = { navController.popBackStack() })
+        }
     }
 }
