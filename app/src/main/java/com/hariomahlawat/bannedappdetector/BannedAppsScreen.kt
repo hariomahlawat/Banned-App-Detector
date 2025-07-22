@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientEnd
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
 import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
+import com.hariomahlawat.bannedappdetector.util.setSystemBars
 import kotlinx.coroutines.launch
 import com.hariomahlawat.bannedappdetector.bannedAppsAZ
 
@@ -41,8 +43,16 @@ fun BannedAppsScreen(
     val searchQuery = remember { mutableStateOf("") }
     val listState   = rememberLazyListState()
     val scope       = rememberCoroutineScope()
+    val dark = isSystemInDarkTheme()
+    setSystemBars(
+        color = if (dark) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
+        darkIcons = !dark
+    )
 
     Scaffold(
+        modifier = Modifier
+            .statusBarsPadding()
+            .navigationBarsPadding(),
         topBar = {
             TopAppBar(
                 title = { Text("Army Banned Apps") },
@@ -72,7 +82,17 @@ fun BannedAppsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(listOf(BgGradientStart, BgGradientEnd)))
+                .background(
+                    Brush.verticalGradient(
+                        if (dark)
+                            listOf(BgGradientStart, BgGradientEnd)
+                        else
+                            listOf(
+                                MaterialTheme.colorScheme.surface,
+                                MaterialTheme.colorScheme.surfaceVariant
+                            )
+                    )
+                )
                 .padding(padding)
         ) {
 

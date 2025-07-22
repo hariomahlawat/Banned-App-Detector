@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +31,7 @@ import com.hariomahlawat.bannedappdetector.util.DeviceInfo
 import com.hariomahlawat.bannedappdetector.util.getDeviceInfo
 import com.hariomahlawat.bannedappdetector.util.saveToCache
 import com.hariomahlawat.bannedappdetector.util.shareImage
+import com.hariomahlawat.bannedappdetector.util.setSystemBars
 import java.text.DateFormat
 import java.util.*
 
@@ -45,8 +47,16 @@ fun ResultsScreen(
     val context = LocalContext.current
     val view    = LocalView.current
     val device  = getDeviceInfo(context)
+    val dark = isSystemInDarkTheme()
+    setSystemBars(
+        color = if (dark) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
+        darkIcons = !dark
+    )
 
     Scaffold(
+        modifier = Modifier
+            .statusBarsPadding()
+            .navigationBarsPadding(),
         topBar = {
             TopAppBar(
                 title = { Text("Scan Results", style = MaterialTheme.typography.headlineSmall) },
@@ -81,7 +91,17 @@ fun ResultsScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(listOf(BgGradientStart, BgGradientEnd)))
+                .background(
+                    Brush.verticalGradient(
+                        if (dark)
+                            listOf(BgGradientStart, BgGradientEnd)
+                        else
+                            listOf(
+                                MaterialTheme.colorScheme.surface,
+                                MaterialTheme.colorScheme.surfaceVariant
+                            )
+                    )
+                )
         ) {
             ResultsBody(
                 state          = state,
