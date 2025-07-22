@@ -67,15 +67,28 @@ fun HomeScreen(
         darkIcons = !dark
     )
 
-    Scaffold(
+    Box(
         modifier = Modifier
-            .statusBarsPadding()
-            .navigationBarsPadding(),
-        topBar = {
-            CenterAlignedTopAppBar(                    // Material3 app‑bar
-                title = { Text("Banned App Detector") },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Transparent,
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    if (dark)
+                        listOf(BgGradientStart, BgGradientEnd)
+                    else
+                        listOf(
+                            MaterialTheme.colorScheme.surface,
+                            MaterialTheme.colorScheme.surfaceVariant
+                        )
+                )
+            )
+    ) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                CenterAlignedTopAppBar(                    // Material3 app‑bar
+                    title = { Text("Banned App Detector") },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = Color.Transparent,
                     titleContentColor = BrandGold
                 ),
                 actions = {
@@ -85,18 +98,19 @@ fun HomeScreen(
                     }
                 }
             )
-        },
-        containerColor = Color.Transparent           // keep gradient visible
-    ) { padding ->
-        HomeContent(
-            state            = state,
-            onScan           = viewModel::onScan,
-            onScanFinished   = viewModel::onScanAnimationFinished,
-            onViewResults    = onViewResults,
-            onViewBannedApps = onViewBannedApps,
-            dark             = dark,
-            modifier         = Modifier.padding(padding)   // scaffold inset
-        )
+            },
+            containerColor = Color.Transparent           // keep gradient visible
+        ) { padding ->
+            HomeContent(
+                state            = state,
+                onScan           = viewModel::onScan,
+                onScanFinished   = viewModel::onScanAnimationFinished,
+                onViewResults    = onViewResults,
+                onViewBannedApps = onViewBannedApps,
+                dark             = dark,
+                modifier         = Modifier.padding(padding)   // scaffold inset
+            )
+        }
     }
 }
 
@@ -112,19 +126,7 @@ private fun HomeContent(
     modifier: Modifier = Modifier            // new param
 ) {
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    if (dark)
-                        listOf(BgGradientStart, BgGradientEnd)
-                    else
-                        listOf(
-                            MaterialTheme.colorScheme.surface,
-                            MaterialTheme.colorScheme.surfaceVariant
-                        )
-                )
-            )
+        modifier = modifier.fillMaxSize()
     ) {
         Column(
             modifier = Modifier

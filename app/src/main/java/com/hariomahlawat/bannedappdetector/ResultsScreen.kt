@@ -53,12 +53,25 @@ fun ResultsScreen(
         darkIcons = !dark
     )
 
-    Scaffold(
+    Box(
         modifier = Modifier
-            .statusBarsPadding()
-            .navigationBarsPadding(),
-        topBar = {
-            TopAppBar(
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    if (dark)
+                        listOf(BgGradientStart, BgGradientEnd)
+                    else
+                        listOf(
+                            MaterialTheme.colorScheme.surface,
+                            MaterialTheme.colorScheme.surfaceVariant
+                        )
+                )
+            )
+    ) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                TopAppBar(
                 title = { Text("Scan Results", style = MaterialTheme.typography.headlineSmall) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -84,30 +97,19 @@ fun ResultsScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
-        },
-        containerColor = Color.Transparent
-    ) { padding ->
+            },
+            containerColor = Color.Transparent
+        ) { padding ->
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        if (dark)
-                            listOf(BgGradientStart, BgGradientEnd)
-                        else
-                            listOf(
-                                MaterialTheme.colorScheme.surface,
-                                MaterialTheme.colorScheme.surfaceVariant
-                            )
-                    )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                ResultsBody(
+                    state          = state,
+                    deviceInfo     = device,
+                    contentPadding = padding
                 )
-        ) {
-            ResultsBody(
-                state          = state,
-                deviceInfo     = device,
-                contentPadding = padding
-            )
 
             AppInfoFooter(
                 modifier = Modifier
