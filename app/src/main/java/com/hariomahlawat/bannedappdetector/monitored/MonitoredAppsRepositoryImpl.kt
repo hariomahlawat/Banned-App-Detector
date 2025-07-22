@@ -9,9 +9,5 @@ import javax.inject.Singleton
 
 @Singleton
 class MonitoredAppsRepositoryImpl @Inject constructor() : MonitoredAppsRepository {
-    private val baseList = bannedAppsList.map { name ->
-        MonitoredAppMeta(name, name)
-    }
-
-    override fun getMonitoredApps(): List<MonitoredAppMeta> = baseList
+    override fun getMonitoredApps(): List<MonitoredAppMeta> = bannedAppsList
 }
