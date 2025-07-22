@@ -31,6 +31,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,6 +51,8 @@ import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
 import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
 import com.hariomahlawat.bannedappdetector.util.setSystemBars
+import com.hariomahlawat.bannedappdetector.UpdateViewModel
+import com.hariomahlawat.bannedappdetector.UpdateDialog
 import java.text.DateFormat
 import java.util.Date
 
@@ -59,9 +64,13 @@ fun HomeScreen(
     onViewBannedApps: () -> Unit,
     onToggleTheme: () -> Unit,
     dark: Boolean,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    updateViewModel: UpdateViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val updateAvailable by updateViewModel.updateAvailable.collectAsState()
+    var showUpdateDialog by remember { mutableStateOf(false) }
+    LaunchedEffect(updateAvailable) { if (updateAvailable) showUpdateDialog = true }
     setSystemBars(
         color = if (dark) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
         darkIcons = !dark
@@ -110,6 +119,9 @@ fun HomeScreen(
                 dark             = dark,
                 modifier         = Modifier.padding(padding)   // scaffold inset
             )
+        }
+        if (showUpdateDialog) {
+            UpdateDialog { showUpdateDialog = false }
         }
     }
 }
