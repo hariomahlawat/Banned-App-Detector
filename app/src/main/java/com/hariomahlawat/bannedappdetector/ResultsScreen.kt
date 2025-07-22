@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.view.drawToBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hariomahlawat.bannedappdetector.components.StatusChip
@@ -114,7 +115,7 @@ private fun ResultsBody(
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier            = Modifier.fillMaxWidth()
+                modifier            = Modifier.fillMaxWidth().padding(4.dp)
             ) {
                 Image(
                     painter = painterResource(R.drawable.archer_logo),
@@ -135,14 +136,15 @@ private fun ResultsBody(
 
         stickyHeader {
             Text(
-                "Detected Banned Apps",
+                text = "DETECTED BANNED APPS",
+                style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 1.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .padding(vertical = 6.dp, horizontal = 20.dp),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                    .padding(horizontal = 20.dp, vertical = 8.dp)
             )
+
         }
 
         items(state.results) { result ->
@@ -195,12 +197,20 @@ private fun SummaryCard(
             HorizontalDivider()
             Spacer(Modifier.height(8.dp))
 
-            Text("Device  : ${deviceInfo.manufacturer} ${deviceInfo.model}",
-                style = MaterialTheme.typography.bodySmall)
-            Text("Android ID: ${deviceInfo.androidId}",
-                style = MaterialTheme.typography.bodySmall)
-            Text("OS      : ${deviceInfo.osVersion}",
-                style = MaterialTheme.typography.bodySmall)
+            // New two‑column device info row
+            @Composable
+            fun DeviceLine(label: String, data: String) {
+                Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(8.dp)) {
+                    Text(label, style = MaterialTheme.typography.labelMedium, modifier = Modifier.weight(1f))
+                    Text(data, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(2f))
+                }
+            }
+
+// Replace three Text() calls:
+            DeviceLine("Device", "${deviceInfo.manufacturer} ${deviceInfo.model}")
+            DeviceLine("Android ID", deviceInfo.androidId)
+            DeviceLine("OS", deviceInfo.osVersion)
+
         }
     }
 }
@@ -241,7 +251,7 @@ private fun BannedAppRow(result: ScanResult) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp)
             .glassCard(Color.Black.copy(alpha = .40f))
     ) {
         ListItem(
@@ -265,7 +275,8 @@ private fun BannedAppRow(result: ScanResult) {
                 Text(result.meta.packageName, style = MaterialTheme.typography.bodySmall)
             },
             trailingContent = { StatusChip(result.status) },
-            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+            modifier = Modifier.heightIn(min = 72.dp)
         )
     }
 }
