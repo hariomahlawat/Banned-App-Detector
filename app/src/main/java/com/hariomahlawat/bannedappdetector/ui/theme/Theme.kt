@@ -7,15 +7,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.isSystemInDarkTheme
+import com.hariomahlawat.bannedappdetector.ThemeSetting
 import com.hariomahlawat.bannedappdetector.ui.theme.AppTypography
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
 import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
 @Composable
 fun BannedAppDetectorTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    theme: ThemeSetting = ThemeSetting.SYSTEM,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
+    val darkTheme = when (theme) {
+        ThemeSetting.SYSTEM -> isSystemInDarkTheme()
+        ThemeSetting.DARK   -> true
+        ThemeSetting.LIGHT  -> false
+    }
     val dynamic = if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
     val colorScheme = dynamic.copy(
         primary = BrandGold,
