@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -24,9 +26,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.drawToBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.hariomahlawat.bannedappdetector.components.StatusChip
 import com.hariomahlawat.bannedappdetector.components.AppInfoFooter
-import com.hariomahlawat.bannedappdetector.ui.theme.*
+import com.hariomahlawat.bannedappdetector.components.StatusChip
+import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientEnd
+import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
+import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
+import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
 import com.hariomahlawat.bannedappdetector.util.DeviceInfo
 import com.hariomahlawat.bannedappdetector.util.getDeviceInfo
 import com.hariomahlawat.bannedappdetector.util.saveToCache
@@ -37,6 +42,7 @@ import java.util.*
 
 private val ErrorRed = Color(0xFFE53935)
 
+/* ---------- screen ---------- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResultsScreen(
@@ -46,8 +52,9 @@ fun ResultsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
-    val view    = LocalView.current
-    val device  = getDeviceInfo(context)
+    val view = LocalView.current
+    val device = getDeviceInfo(context)
+
     setSystemBars(
         color = if (dark) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
         darkIcons = !dark
@@ -72,50 +79,48 @@ fun ResultsScreen(
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 TopAppBar(
-                title = { Text("Scan Results", style = MaterialTheme.typography.headlineSmall) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            painter = painterResource(android.R.drawable.ic_menu_close_clear_cancel),
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            view.drawToBitmap()
-                                .saveToCache(context)
-                                .let { shareImage(context, it) }
+                    title = { Text("Scan Results", style = MaterialTheme.typography.headlineSmall) },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                painter = painterResource(android.R.drawable.ic_menu_close_clear_cancel),
+                                contentDescription = "Back"
+                            )
                         }
-                    ) {
-                        Icon(
-                            painter = painterResource(android.R.drawable.ic_menu_share),
-                            contentDescription = "Share"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                view.drawToBitmap()
+                                    .saveToCache(context)
+                                    .let { shareImage(context, it) }
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(android.R.drawable.ic_menu_share),
+                                contentDescription = "Share"
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                )
             },
             containerColor = Color.Transparent
         ) { padding ->
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
+            Box(modifier = Modifier.fillMaxSize()) {
                 ResultsBody(
-                    state          = state,
-                    deviceInfo     = device,
+                    state = state,
+                    deviceInfo = device,
                     contentPadding = padding
                 )
 
-            AppInfoFooter(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 12.dp)
-            )
+                AppInfoFooter(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 12.dp)
+                )
+            }
         }
     }
 }
@@ -135,15 +140,17 @@ private fun ResultsBody(
         item {
             Spacer(Modifier.height(24.dp))
 
-            val total   = state.summary?.totalMonitored ?: 0
-            val banned  = state.results.size
+            val total = state.summary?.totalMonitored ?: 0
+            val banned = state.results.size
             val scanned = state.lastScanAt?.let {
                 DateFormat.getDateTimeInstance().format(Date(it))
             } ?: "--"
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier            = Modifier.fillMaxWidth().padding(4.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp)
             ) {
                 Image(
                     painter = painterResource(R.drawable.archer_logo2),
@@ -154,9 +161,9 @@ private fun ResultsBody(
                 Spacer(Modifier.height(16.dp))
 
                 SummaryCard(
-                    total      = total,
-                    banned     = banned,
-                    scanTime   = scanned,
+                    total = total,
+                    banned = banned,
+                    scanTime = scanned,
                     deviceInfo = deviceInfo
                 )
             }
@@ -172,7 +179,6 @@ private fun ResultsBody(
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .padding(horizontal = 20.dp, vertical = 8.dp)
             )
-
         }
 
         items(state.results) { result ->
@@ -204,17 +210,17 @@ private fun SummaryCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 MetricTile(
-                    value  = banned.toString(),
-                    label  = "BANNED",
-                    icon   = Icons.Default.Warning,
-                    tint   = ErrorRed,
+                    value = banned.toString(),
+                    label = "BANNED",
+                    icon = Icons.Default.Warning,
+                    tint = ErrorRed,
                     modifier = Modifier.weight(1f)
                 )
                 MetricTile(
-                    value  = total.toString(),
-                    label  = "SCANNED",
-                    icon   = Icons.Default.Inbox,
-                    tint   = BrandGold,
+                    value = total.toString(),
+                    label = "SCANNED",
+                    icon = Icons.Default.Inbox,
+                    tint = BrandGold,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -225,20 +231,26 @@ private fun SummaryCard(
             HorizontalDivider()
             Spacer(Modifier.height(8.dp))
 
-            // New two‑column device info row
+            // helper row for device info
             @Composable
             fun DeviceLine(label: String, data: String) {
                 Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(8.dp)) {
-                    Text(label, style = MaterialTheme.typography.labelMedium, modifier = Modifier.weight(1f))
-                    Text(data, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(2f))
+                    Text(
+                        label,
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        data,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.weight(2f)
+                    )
                 }
             }
 
-// Replace three Text() calls:
             DeviceLine("Device", "${deviceInfo.manufacturer} ${deviceInfo.model}")
             DeviceLine("Android ID", deviceInfo.androidId)
             DeviceLine("OS", deviceInfo.osVersion)
-
         }
     }
 }

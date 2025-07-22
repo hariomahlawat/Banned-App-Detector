@@ -97,11 +97,11 @@ fun BannedAppsScreen(
                     .padding(padding)
             ) {
 
-            SearchBar(
-                value = searchQuery.value,
-                onValueChange = { searchQuery.value = it }
-            )
-
+                SearchBar(
+                    value = searchQuery.value,
+                    onValueChange = { searchQuery.value = it }
+                )
+            }
             Spacer(Modifier.height(4.dp))
 
             BannedAppsList(
