@@ -4,9 +4,4 @@
         <item name="android:navigationBarColor">?attr/colorSurface</item>
     </style>
 
-    <style name="Theme.BannedAppDetector.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/black</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/archer_logo</item>
-        <item name="postSplashScreenTheme">@style/Theme.BannedAppDetector</item>
-    </style>
 </resources>
