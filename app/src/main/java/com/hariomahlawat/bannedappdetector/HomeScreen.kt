@@ -11,16 +11,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.VerifiedUser
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.AssistChip
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,7 +41,6 @@ import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientEnd
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
 import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
 import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
-import com.hariomahlawat.bannedappdetector.ui.theme.NeutralGrey
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
 import java.text.DateFormat
 import java.util.Date
@@ -98,7 +99,8 @@ private fun HomeContent(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 24.dp),
+                .padding(horizontal = 20.dp, vertical = 24.dp)
+                .navigationBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
@@ -111,8 +113,14 @@ private fun HomeContent(
 
             /* hero text */
             Text(
-                text      = "Precision Scan for Banned Apps",
-                style     = MaterialTheme.typography.headlineLarge,
+                text      = "Precision Scan",
+                style     = MaterialTheme.typography.displaySmall,
+                color     = BrandGold,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text      = "for Banned Apps",
+                style     = MaterialTheme.typography.headlineMedium,
                 color     = BrandGold,
                 textAlign = TextAlign.Center,
             )
@@ -120,25 +128,39 @@ private fun HomeContent(
             /* tag line */
             Text(
                 "Local analysis. Targeted detection.",
-                style     = MaterialTheme.typography.titleMedium,
-                color     = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.92f),
+                style     = MaterialTheme.typography.bodyMedium,
+                color     = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center,
-                modifier  = Modifier.padding(top = 4.dp, bottom = 20.dp)
+                modifier  = Modifier.padding(top = 4.dp, bottom = 12.dp)
             )
 
-            TextButton(onClick = onViewBannedApps) {
-                Text("Browse Army Banned Apps")
-            }
+            AssistChip(
+                onClick = onViewBannedApps,
+                label = { Text("Browse Army Banned Apps") },
+                leadingIcon = { Icon(Icons.Default.ArrowForward, contentDescription = null) }
+            )
+            Spacer(Modifier.height(32.dp))
 
             /* ---------- trust / privacy chips ---------- */
             TrustChipsRow()
+            Spacer(Modifier.height(28.dp))
 
             /* scan button */
-            Spacer(Modifier.height(24.dp))
             Button(
                 onClick = onScan,
-                enabled = !state.isScanning                     // avoid double‑tap
+                enabled = !state.isScanning,                     // avoid double‑tap
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .height(56.dp)
             ) {
+                if (state.isScanning) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
                 Text(if (state.isScanning) "Scanning…" else "Scan Now")
             }
 
@@ -226,7 +248,7 @@ private fun SummaryCard(
                 Text(
                     "Disabled: ${summary.installedDisabled}",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = NeutralGrey
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Spacer(Modifier.height(12.dp))
