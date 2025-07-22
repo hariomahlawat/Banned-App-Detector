@@ -45,20 +45,33 @@ fun AppNavigation(theme: ThemeSetting, onToggleTheme: () -> Unit) {
             }
         }
         composable("home") {
+            val dark = theme == ThemeSetting.DARK ||
+                       (theme == ThemeSetting.SYSTEM &&
+                        androidx.compose.foundation.isSystemInDarkTheme())
             HomeScreen(
                 onViewResults    = { navController.navigate("results") },
                 onViewBannedApps = { navController.navigate("bannedApps") },
                 onToggleTheme    = onToggleTheme,
-                dark             = theme == ThemeSetting.DARK ||
-                                   (theme == ThemeSetting.SYSTEM &&
-                                    androidx.compose.foundation.isSystemInDarkTheme())
+                dark             = dark
             )
         }
         composable("results") {
-            ResultsScreen(onBack = { navController.popBackStack() })
+            val dark = theme == ThemeSetting.DARK ||
+                       (theme == ThemeSetting.SYSTEM &&
+                        androidx.compose.foundation.isSystemInDarkTheme())
+            ResultsScreen(
+                onBack = { navController.popBackStack() },
+                dark   = dark
+            )
         }
         composable("bannedApps") {
-            BannedAppsScreen(onBack = { navController.popBackStack() })
+            val dark = theme == ThemeSetting.DARK ||
+                       (theme == ThemeSetting.SYSTEM &&
+                        androidx.compose.foundation.isSystemInDarkTheme())
+            BannedAppsScreen(
+                onBack = { navController.popBackStack() },
+                dark   = dark
+            )
         }
     }
 }
