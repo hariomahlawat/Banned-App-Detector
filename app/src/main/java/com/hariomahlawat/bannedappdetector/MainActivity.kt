@@ -29,7 +29,14 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    NavHost(navController, startDestination = "home") {
+    NavHost(navController, startDestination = "splash") {
+        composable("splash") {
+            SplashScreen {
+                navController.navigate("home") {
+                    popUpTo("splash") { inclusive = true }
+                }
+            }
+        }
         composable("home") {
             HomeScreen(
                 onViewResults    = { navController.navigate("results") },
