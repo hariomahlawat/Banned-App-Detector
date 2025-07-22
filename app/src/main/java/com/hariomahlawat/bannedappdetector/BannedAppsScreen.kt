@@ -68,13 +68,13 @@ fun BannedAppsScreen(
             topBar = {
                 TopAppBar(
                     title = { Text("Army Banned Apps") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                )
             },
             floatingActionButton = {
                 val showFab by remember {
@@ -94,7 +94,10 @@ fun BannedAppsScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
+                    .padding(
+                        top = padding.calculateTopPadding(),
+                        bottom = padding.calculateBottomPadding()
+                    )
             ) {
 
                 SearchBar(
@@ -105,9 +108,10 @@ fun BannedAppsScreen(
             Spacer(Modifier.height(4.dp))
 
             BannedAppsList(
-                buckets      = bannedAppsAZ,
-                query        = searchQuery.value,
-                listState    = listState
+                buckets   = bannedAppsAZ,
+                query     = searchQuery.value,
+                listState = listState,
+                modifier  = Modifier.weight(1f)
             )
         }
     }
@@ -148,9 +152,10 @@ private fun SearchBar(value: String, onValueChange: (String) -> Unit) {
 private fun BannedAppsList(
     buckets: Map<Char, List<String>>,
     query: String,
-    listState: LazyListState
+    listState: LazyListState,
+    modifier: Modifier = Modifier
 ) {
-    LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+    LazyColumn(state = listState, modifier = modifier.fillMaxSize()) {
         buckets
             .filterKeys { key -> buckets[key]!!.any { it.contains(query, true) } }
             .toSortedMap()
