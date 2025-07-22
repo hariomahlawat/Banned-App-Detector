@@ -1,6 +1,7 @@
 package com.hariomahlawat.bannedappdetector
 
 import com.hariomahlawat.bannedappdetector.components.ScanProgressBar
+import com.hariomahlawat.bannedappdetector.components.AppInfoFooter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -201,6 +202,12 @@ private fun HomeContent(
 
             Spacer(Modifier.height(40.dp))
         }
+
+        AppInfoFooter(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 12.dp)
+        )
     }
 }
 
