@@ -85,6 +85,7 @@ fun HomeScreen(
             onScanFinished   = viewModel::onScanAnimationFinished,
             onViewResults    = onViewResults,
             onViewBannedApps = onViewBannedApps,
+            dark             = dark,
             modifier         = Modifier.padding(padding)   // scaffold inset
         )
     }
@@ -98,6 +99,7 @@ private fun HomeContent(
     onScanFinished: () -> Unit,
     onViewResults: () -> Unit,
     onViewBannedApps: () -> Unit,
+    dark: Boolean,
     modifier: Modifier = Modifier            // new param
 ) {
     Box(
