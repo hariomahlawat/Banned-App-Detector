@@ -23,7 +23,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
@@ -128,7 +127,7 @@ private fun HomeContent(
 
             /* logo */
             Image(
-                painter  = painterResource(R.drawable.archer_logo),
+                painter  = painterResource(R.drawable.archer_logo2),
                 contentDescription = "App logo – archer",
                 modifier = Modifier.size(160.dp)
             )

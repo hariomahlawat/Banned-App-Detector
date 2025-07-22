@@ -138,7 +138,7 @@ private fun ResultsBody(
                 modifier            = Modifier.fillMaxWidth().padding(4.dp)
             ) {
                 Image(
-                    painter = painterResource(R.drawable.archer_logo),
+                    painter = painterResource(R.drawable.archer_logo2),
                     contentDescription = null,
                     modifier = Modifier.size(96.dp)
                 )
