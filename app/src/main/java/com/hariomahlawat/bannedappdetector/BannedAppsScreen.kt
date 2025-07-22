@@ -43,8 +43,9 @@ fun BannedAppsScreen(
     val searchQuery = remember { mutableStateOf("") }
     val listState   = rememberLazyListState()
     val scope       = rememberCoroutineScope()
+
     setSystemBars(
-        color = if (dark) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
+        color     = if (dark) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
         darkIcons = !dark
     )
 
@@ -53,13 +54,11 @@ fun BannedAppsScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    if (dark)
-                        listOf(BgGradientStart, BgGradientEnd)
-                    else
-                        listOf(
-                            MaterialTheme.colorScheme.surface,
-                            MaterialTheme.colorScheme.surfaceVariant
-                        )
+                    if (dark) listOf(BgGradientStart, BgGradientEnd)
+                    else listOf(
+                        MaterialTheme.colorScheme.surface,
+                        MaterialTheme.colorScheme.surfaceVariant
+                    )
                 )
             )
     ) {
@@ -73,20 +72,20 @@ fun BannedAppsScreen(
                             Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
+                    )
                 )
             },
             floatingActionButton = {
-                val showFab by remember {
-                    derivedStateOf { listState.firstVisibleItemIndex > 0 }
-                }
+                val showFab by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
                 if (showFab) {
                     FloatingActionButton(
                         onClick = { scope.launch { listState.animateScrollToItem(0) } }
-                ) {
-                    Icon(Icons.Default.ArrowUpward, contentDescription = "Scroll to top")
+                    ) {
+                        Icon(Icons.Default.ArrowUpward, contentDescription = "Scroll to top")
+                    }
                 }
-            }
             },
             containerColor = Color.Transparent
         ) { padding ->
@@ -99,20 +98,21 @@ fun BannedAppsScreen(
                         bottom = padding.calculateBottomPadding()
                     )
             ) {
-
                 SearchBar(
                     value = searchQuery.value,
                     onValueChange = { searchQuery.value = it }
                 )
-            }
-            Spacer(Modifier.height(4.dp))
 
-            BannedAppsList(
-                buckets   = bannedAppsAZ,
-                query     = searchQuery.value,
-                listState = listState,
-                modifier  = Modifier.weight(1f)
-            )
+                Spacer(Modifier.height(4.dp))
+
+                // NOW this is inside ColumnScope so weight() works
+                BannedAppsList(
+                    buckets   = bannedAppsAZ,
+                    query     = searchQuery.value,
+                    listState = listState,
+                    modifier  = Modifier.weight(1f)
+                )
+            }
         }
     }
 }
@@ -134,14 +134,14 @@ private fun SearchBar(value: String, onValueChange: (String) -> Unit) {
             Icon(Icons.Default.Search, null, tint = BrandGold)
             Spacer(Modifier.width(8.dp))
             BasicTextField(
-                value         = value,
+                value = value,
                 onValueChange = onValueChange,
-                singleLine    = true,
-                textStyle     = TextStyle(
+                singleLine = true,
+                textStyle = TextStyle(
                     color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 16.sp
                 ),
-                modifier      = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
@@ -155,24 +155,31 @@ private fun BannedAppsList(
     listState: LazyListState,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(state = listState, modifier = modifier.fillMaxSize()) {
+    LazyColumn(
+        state = listState,
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 8.dp)
+    ) {
         buckets
-            .filterKeys { key -> buckets[key]!!.any { it.contains(query, true) } }
+            .filterKeys { key -> buckets[key]!!.any { it.contains(query, ignoreCase = true) } }
             .toSortedMap()
             .forEach { (letter, apps) ->
 
                 stickyHeader {
-                    Surface(tonalElevation = 2.dp, modifier = Modifier.fillMaxWidth()) {
+                    Surface(
+                        tonalElevation = 2.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         Text(
-                            text   = letter.toString(),
-                            color  = BrandGold,
-                            style  = MaterialTheme.typography.labelLarge,
+                            text = letter.toString(),
+                            color = BrandGold,
+                            style = MaterialTheme.typography.labelLarge,
                             modifier = Modifier.padding(start = 20.dp, top = 6.dp, bottom = 6.dp)
                         )
                     }
                 }
 
-                items(apps.filter { it.contains(query, true) }) { app ->
+                items(apps.filter { it.contains(query, ignoreCase = true) }) { app ->
                     ListItem(
                         leadingContent = {
                             Icon(
