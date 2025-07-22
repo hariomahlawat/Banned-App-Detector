@@ -59,7 +59,6 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.media3.common.ktx)
-    implementation(libs.androidx.core.splashscreen)
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.datastore.preferences)
