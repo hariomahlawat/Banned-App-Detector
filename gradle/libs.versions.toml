@@ -14,6 +14,8 @@ junit = "4.13.2"
 androidJunit = "1.2.1"
 espresso = "3.6.1"
 media3CommonKtx = "1.7.1"
+playcore = "2.1.0"
+coroutinesPlay = "1.7.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,6 +40,9 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidJunit" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
 androidx-media3-common-ktx = { group = "androidx.media3", name = "media3-common-ktx", version.ref = "media3CommonKtx" }
+play-app-update = { group = "com.google.android.play", name = "app-update", version.ref = "playcore" }
+play-app-update-ktx = { group = "com.google.android.play", name = "app-update-ktx", version.ref = "playcore" }
+coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutinesPlay" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

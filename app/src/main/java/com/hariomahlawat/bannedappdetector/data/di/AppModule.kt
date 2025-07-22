@@ -12,8 +12,13 @@ import com.hariomahlawat.bannedappdetector.store.ThemeRepositoryImpl
 import com.hariomahlawat.bannedappdetector.usecase.ComputeSummaryStatsUseCase
 import com.hariomahlawat.bannedappdetector.usecase.GetScanResultsFlowUseCase
 import com.hariomahlawat.bannedappdetector.usecase.ScanMonitoredAppsUseCase
+import com.hariomahlawat.bannedappdetector.usecase.CheckForAppUpdateUseCase
 import com.hariomahlawat.bannedappdetector.util.DispatcherProvider
 import com.hariomahlawat.bannedappdetector.util.StandardDispatcherProvider
+import com.hariomahlawat.bannedappdetector.update.AppUpdateRepository
+import com.hariomahlawat.bannedappdetector.update.PlayAppUpdateRepository
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -49,6 +54,13 @@ object AppModule {
     fun themeRepo(impl: ThemeRepositoryImpl): ThemeRepository = impl
 
     @Provides
+    fun appUpdateManager(@ApplicationContext context: Context): AppUpdateManager =
+        AppUpdateManagerFactory.create(context)
+
+    @Provides @Singleton
+    fun appUpdateRepo(impl: PlayAppUpdateRepository): AppUpdateRepository = impl
+
+    @Provides
     fun scanUseCase(
         monitored: MonitoredAppsRepository,
         stored: ScanResultsRepository,
@@ -59,6 +71,9 @@ object AppModule {
 
     @Provides
     fun resultsFlowUseCase(repo: ScanResultsRepository) = GetScanResultsFlowUseCase(repo)
+
+    @Provides
+    fun checkUpdateUseCase(repo: AppUpdateRepository) = CheckForAppUpdateUseCase(repo)
 
     @Provides
     fun summaryUseCase() = ComputeSummaryStatsUseCase()
