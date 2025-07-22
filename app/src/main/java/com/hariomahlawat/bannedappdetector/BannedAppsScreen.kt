@@ -48,13 +48,26 @@ fun BannedAppsScreen(
         darkIcons = !dark
     )
 
-    Scaffold(
+    Box(
         modifier = Modifier
-            .statusBarsPadding()
-            .navigationBarsPadding(),
-        topBar = {
-            TopAppBar(
-                title = { Text("Army Banned Apps") },
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    if (dark)
+                        listOf(BgGradientStart, BgGradientEnd)
+                    else
+                        listOf(
+                            MaterialTheme.colorScheme.surface,
+                            MaterialTheme.colorScheme.surfaceVariant
+                        )
+                )
+            )
+    ) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                TopAppBar(
+                    title = { Text("Army Banned Apps") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -62,38 +75,27 @@ fun BannedAppsScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
-        },
-        floatingActionButton = {
-            val showFab by remember {
-                derivedStateOf { listState.firstVisibleItemIndex > 0 }
-            }
-            if (showFab) {
-                FloatingActionButton(
-                    onClick = { scope.launch { listState.animateScrollToItem(0) } }
+            },
+            floatingActionButton = {
+                val showFab by remember {
+                    derivedStateOf { listState.firstVisibleItemIndex > 0 }
+                }
+                if (showFab) {
+                    FloatingActionButton(
+                        onClick = { scope.launch { listState.animateScrollToItem(0) } }
                 ) {
                     Icon(Icons.Default.ArrowUpward, contentDescription = "Scroll to top")
                 }
             }
-        },
-        containerColor = Color.Transparent
-    ) { padding ->
+            },
+            containerColor = Color.Transparent
+        ) { padding ->
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        if (dark)
-                            listOf(BgGradientStart, BgGradientEnd)
-                        else
-                            listOf(
-                                MaterialTheme.colorScheme.surface,
-                                MaterialTheme.colorScheme.surfaceVariant
-                            )
-                    )
-                )
-                .padding(padding)
-        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
 
             SearchBar(
                 value = searchQuery.value,
