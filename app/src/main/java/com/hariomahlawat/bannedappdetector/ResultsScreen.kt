@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.drawToBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hariomahlawat.bannedappdetector.components.StatusChip
+import com.hariomahlawat.bannedappdetector.components.AppInfoFooter
 import com.hariomahlawat.bannedappdetector.ui.theme.*
 import com.hariomahlawat.bannedappdetector.util.DeviceInfo
 import com.hariomahlawat.bannedappdetector.util.getDeviceInfo
@@ -107,6 +108,12 @@ fun ResultsScreen(
                 state          = state,
                 deviceInfo     = device,
                 contentPadding = padding
+            )
+
+            AppInfoFooter(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 12.dp)
             )
         }
     }
