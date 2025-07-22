@@ -23,9 +23,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.ElevatedAssistChip
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +45,7 @@ import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
 import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
 import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
+import com.hariomahlawat.bannedappdetector.util.setSystemBars
 import java.text.DateFormat
 import java.util.Date
 
@@ -54,8 +58,16 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val dark = isSystemInDarkTheme()
+    setSystemBars(
+        color = if (dark) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
+        darkIcons = !dark
+    )
 
     Scaffold(
+        modifier = Modifier
+            .statusBarsPadding()
+            .navigationBarsPadding(),
         topBar = {
             CenterAlignedTopAppBar(                    // Material3 app‑bar
                 title = { Text("Banned App Detector") },
@@ -92,15 +104,22 @@ private fun HomeContent(
         modifier = modifier
             .fillMaxSize()
             .background(
-                Brush.verticalGradient(listOf(BgGradientStart, BgGradientEnd))
+                Brush.verticalGradient(
+                    if (dark)
+                        listOf(BgGradientStart, BgGradientEnd)
+                    else
+                        listOf(
+                            MaterialTheme.colorScheme.surface,
+                            MaterialTheme.colorScheme.surfaceVariant
+                        )
+                )
             )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 24.dp)
-                .navigationBarsPadding(),
+                .padding(horizontal = 20.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
@@ -134,7 +153,7 @@ private fun HomeContent(
                 modifier  = Modifier.padding(top = 4.dp, bottom = 12.dp)
             )
 
-            AssistChip(
+            ElevatedAssistChip(
                 onClick = onViewBannedApps,
                 label = { Text("Browse Army Banned Apps") },
                 leadingIcon = { Icon(Icons.Default.ArrowForward, contentDescription = null) }
@@ -149,8 +168,9 @@ private fun HomeContent(
             Button(
                 onClick = onScan,
                 enabled = !state.isScanning,                     // avoid double‑tap
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 modifier = Modifier
-                    .fillMaxWidth(0.7f)
+                    .fillMaxWidth(0.8f)
                     .height(56.dp)
             ) {
                 if (state.isScanning) {
@@ -185,7 +205,10 @@ private fun HomeContent(
 /* ---------- 3. Trust chips ---------- */
 @Composable
 private fun TrustChipsRow() {
-    val chipBg = Color.White.copy(alpha = 0.24f)
+    val chipBg = if (isSystemInDarkTheme())
+        Color.White.copy(alpha = 0.24f)
+    else
+        MaterialTheme.colorScheme.surfaceVariant
     val chipModifier = Modifier
         .padding(horizontal = 4.dp)
         .clip(RoundedCornerShape(50))
