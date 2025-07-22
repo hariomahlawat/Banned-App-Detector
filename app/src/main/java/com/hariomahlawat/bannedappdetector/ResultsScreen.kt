@@ -11,7 +11,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,13 +41,13 @@ private val ErrorRed = Color(0xFFE53935)
 @Composable
 fun ResultsScreen(
     onBack: () -> Unit,
+    dark: Boolean,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     val view    = LocalView.current
     val device  = getDeviceInfo(context)
-    val dark = isSystemInDarkTheme()
     setSystemBars(
         color = if (dark) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
         darkIcons = !dark

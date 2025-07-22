@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -38,12 +37,12 @@ import com.hariomahlawat.bannedappdetector.bannedAppsAZ
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BannedAppsScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    dark: Boolean
 ) {
     val searchQuery = remember { mutableStateOf("") }
     val listState   = rememberLazyListState()
     val scope       = rememberCoroutineScope()
-    val dark = isSystemInDarkTheme()
     setSystemBars(
         color = if (dark) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
         darkIcons = !dark
