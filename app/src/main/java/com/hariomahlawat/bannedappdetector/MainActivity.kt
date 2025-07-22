@@ -6,11 +6,16 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowCompat
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.hariomahlawat.bannedappdetector.ui.theme.BannedAppDetectorTheme
+import com.hariomahlawat.bannedappdetector.ThemeViewModel
+import com.hariomahlawat.bannedappdetector.ThemeSetting
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -19,15 +24,17 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
-            BannedAppDetectorTheme {
-                AppNavigation()
+            val vm: ThemeViewModel = hiltViewModel()
+            val theme by vm.theme.collectAsState()
+            BannedAppDetectorTheme(theme) {
+                AppNavigation(theme = theme, onToggleTheme = vm::toggleTheme)
             }
         }
     }
 }
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(theme: ThemeSetting, onToggleTheme: () -> Unit) {
     val navController = rememberNavController()
     NavHost(navController, startDestination = "splash") {
         composable("splash") {
@@ -40,7 +47,11 @@ fun AppNavigation() {
         composable("home") {
             HomeScreen(
                 onViewResults    = { navController.navigate("results") },
-                onViewBannedApps = { navController.navigate("bannedApps") }
+                onViewBannedApps = { navController.navigate("bannedApps") },
+                onToggleTheme    = onToggleTheme,
+                dark             = theme == ThemeSetting.DARK ||
+                                   (theme == ThemeSetting.SYSTEM &&
+                                    androidx.compose.foundation.isSystemInDarkTheme())
             )
         }
         composable("results") {

@@ -13,6 +13,8 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -23,12 +25,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,10 +57,11 @@ import java.util.Date
 fun HomeScreen(
     onViewResults: () -> Unit,
     onViewBannedApps: () -> Unit,
+    onToggleTheme: () -> Unit,
+    dark: Boolean,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    val dark = isSystemInDarkTheme()
     setSystemBars(
         color = if (dark) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
         darkIcons = !dark
@@ -74,7 +77,13 @@ fun HomeScreen(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Color.Transparent,
                     titleContentColor = BrandGold
-                )
+                ),
+                actions = {
+                    IconButton(onClick = onToggleTheme) {
+                        val icon = if (dark) Icons.Default.LightMode else Icons.Default.DarkMode
+                        Icon(icon, contentDescription = "Toggle theme")
+                    }
+                }
             )
         },
         containerColor = Color.Transparent           // keep gradient visible
@@ -163,7 +172,7 @@ private fun HomeContent(
             Spacer(Modifier.height(32.dp))
 
             /* ---------- trust / privacy chips ---------- */
-            TrustChipsRow()
+            TrustChipsRow(dark)
             Spacer(Modifier.height(28.dp))
 
             /* scan button */
@@ -212,8 +221,8 @@ private fun HomeContent(
 
 /* ---------- 3. Trust chips ---------- */
 @Composable
-private fun TrustChipsRow() {
-    val chipBg = if (isSystemInDarkTheme())
+private fun TrustChipsRow(dark: Boolean) {
+    val chipBg = if (dark)
         Color.White.copy(alpha = 0.24f)
     else
         MaterialTheme.colorScheme.surfaceVariant

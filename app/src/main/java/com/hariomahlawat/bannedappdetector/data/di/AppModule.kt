@@ -6,7 +6,9 @@ import android.content.pm.PackageManager
 import com.hariomahlawat.bannedappdetector.monitored.MonitoredAppsRepositoryImpl
 import com.hariomahlawat.bannedappdetector.repository.MonitoredAppsRepository
 import com.hariomahlawat.bannedappdetector.repository.ScanResultsRepository
+import com.hariomahlawat.bannedappdetector.repository.ThemeRepository
 import com.hariomahlawat.bannedappdetector.store.ScanResultsRepositoryImpl
+import com.hariomahlawat.bannedappdetector.store.ThemeRepositoryImpl
 import com.hariomahlawat.bannedappdetector.usecase.ComputeSummaryStatsUseCase
 import com.hariomahlawat.bannedappdetector.usecase.GetScanResultsFlowUseCase
 import com.hariomahlawat.bannedappdetector.usecase.ScanMonitoredAppsUseCase
@@ -42,6 +44,9 @@ object AppModule {
 
     @Provides @Singleton
     fun scanResultsRepo(impl: ScanResultsRepositoryImpl): ScanResultsRepository = impl
+
+    @Provides @Singleton
+    fun themeRepo(impl: ThemeRepositoryImpl): ThemeRepository = impl
 
     @Provides
     fun scanUseCase(
