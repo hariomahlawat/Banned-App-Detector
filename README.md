@@ -23,7 +23,7 @@ Add entries to `MonitoredAppsRepositoryImpl`. Future improvement: load from JSON
 
 Requires Android Studio Iguana (2023.2.1 or newer) with JDK 17.
 
-To build from the command line run:
+To build a debug version from the command line run:
 
 ```
 ./gradlew assembleDebug
@@ -34,6 +34,15 @@ Install the debug build on a connected device with:
 ```
 ./gradlew installDebug
 ```
+
+For a production ready build run:
+
+```
+./gradlew assembleRelease
+```
+
+The release build type enables code and resource shrinking via R8/ProGuard.
+Provide your own signing configuration before publishing to the Play Store.
 
 You can also open the project in Android Studio and click **Run** to deploy.
 
