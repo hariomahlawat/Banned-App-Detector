@@ -30,17 +30,15 @@ class ScanMonitoredAppsUseCase(
 
         /* 1. Capture (PackageInfo, ApplicationInfo?) pairs --------------- */
         val installed: List<Pair<PackageInfo, ApplicationInfo?>> =
-            pm.getInstalledPackages(0) /* API‑33+: use flagsOf(0L) */       // :contentReference[oaicite:0]{index=0}
-                .map { pkg -> pkg to pkg.applicationInfo }                  // nullable by design :contentReference[oaicite:1]{index=1}
+            pm.getInstalledPackages(0) /* API‑33+: use flagsOf(0L) */
+                .map { pkg -> pkg to pkg.applicationInfo }                  // nullable by design
 
         /* 2. Build result list ------------------------------------------- */
         val results = monitoredAppsRepository.getMonitoredApps().map { meta ->
 
-            /* find first installed app whose *label* matches displayName */
-            val match = installed.find { (_, info) ->
-                info != null &&                                           // guard nullability :contentReference[oaicite:2]{index=2}
-                        pm.getApplicationLabel(info).toString()
-                            .equals(meta.displayName, ignoreCase = true)
+            /* find first installed app whose package name matches */
+            val match = installed.find { (pkgInfo, _) ->
+                pkgInfo.packageName.equals(meta.packageName, ignoreCase = true)
             }
 
             if (match != null) {
