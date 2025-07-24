@@ -7,7 +7,8 @@ positives and negatives.
 
 **Status:** A basic metadata collector and heuristic risk scorer are now
 implemented. Ratings and download counts remain stubbed until Play Store data is
-available.
+available. A simple local sentiment analyser estimates how many recent reviews
+are negative and feeds this ratio into the risk score.
 
 ## Overview
 
