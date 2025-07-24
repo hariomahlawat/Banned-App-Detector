@@ -24,7 +24,7 @@ class ScanMonitoredAppsUseCase(
 ) {
 
     /** runs the scan on the supplied IO dispatcher */
-    suspend operator fun invoke(): List<ScanResult> = withContext(io) {
+    suspend operator fun invoke(includeUnwanted: Boolean): List<ScanResult> = withContext(io) {
 
         val now = clock()
 
@@ -34,7 +34,7 @@ class ScanMonitoredAppsUseCase(
                 .map { pkg -> pkg to pkg.applicationInfo }                  // nullable by design
 
         /* 2. Build result list ------------------------------------------- */
-        val results = monitoredAppsRepository.getMonitoredApps().map { meta ->
+        val results = monitoredAppsRepository.getMonitoredApps(includeUnwanted).map { meta ->
 
             /* find first installed app whose package name matches */
             val match = installed.find { (pkgInfo, _) ->

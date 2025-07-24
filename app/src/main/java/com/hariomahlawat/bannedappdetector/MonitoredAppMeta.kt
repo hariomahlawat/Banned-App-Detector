@@ -2,10 +2,12 @@ package com.hariomahlawat.bannedappdetector
 
 
 
+enum class AppCategory { BANNED, UNWANTED }
+
 data class MonitoredAppMeta(
     val packageName: String,
     val displayName: String,
-    val category: String? = null,
+    val category: AppCategory = AppCategory.BANNED,
     val notes: String? = null
 )
 

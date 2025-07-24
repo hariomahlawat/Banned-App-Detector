@@ -22,7 +22,8 @@ data class HomeUiState(
     val lastScanAt: Long? = null,
     val message: String? = null,
     val showMonitoredDialog: Boolean = false,
-    val monitoredApps: List<MonitoredAppMeta> = emptyList()
+    val monitoredApps: List<MonitoredAppMeta> = emptyList(),
+    val includeUnwanted: Boolean = false
 )
 
 @HiltViewModel
@@ -57,7 +58,7 @@ class HomeViewModel @Inject constructor(
         if (_state.value.isScanning) return
         viewModelScope.launch {
             _state.update { it.copy(isScanning = true, message = null, progress = 0f, foundCount = 0, results = emptyList()) }
-            val allResults = scan()
+            val allResults = scan(_state.value.includeUnwanted)
             val installed = allResults.filter { it.status != MonitoredStatus.NOT_INSTALLED }
             val summary = summaryUseCase(allResults)
             _state.update {
@@ -85,6 +86,8 @@ class HomeViewModel @Inject constructor(
     }
 
     fun showMonitored(show: Boolean) { _state.update { it.copy(showMonitoredDialog = show) } }
+
+    fun setIncludeUnwanted(value: Boolean) { _state.update { it.copy(includeUnwanted = value) } }
 
     fun dismissMessage() { _state.update { it.copy(message = null) } }
 }
