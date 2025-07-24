@@ -351,7 +351,19 @@ private fun BannedAppRow(result: ScanResult) {
             supportingContent = {
                 Text(result.meta.packageName, style = MaterialTheme.typography.bodySmall)
             },
-            trailingContent = { StatusChip(result.status) },
+            trailingContent = {
+                Column(horizontalAlignment = Alignment.End) {
+                    StatusChip(result.status)
+                    result.riskScore?.let {
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "Risk: $it",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            },
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
             modifier = Modifier.heightIn(min = 72.dp)
         )

@@ -3,6 +3,7 @@ package com.hariomahlawat.bannedappdetector.usecase
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.ApplicationInfo
+import com.hariomahlawat.bannedappdetector.util.RiskScoreCalculator
 import com.hariomahlawat.bannedappdetector.MonitoredStatus
 import com.hariomahlawat.bannedappdetector.ScanResult
 import com.hariomahlawat.bannedappdetector.SummaryStats
@@ -22,6 +23,7 @@ class ScanMonitoredAppsUseCase(
     private val io: CoroutineDispatcher,
     private val clock: () -> Long
 ) {
+    private val riskScorer = RiskScoreCalculator(pm)
 
     /** runs the scan on the supplied IO dispatcher */
     suspend operator fun invoke(includeUnwanted: Boolean): List<ScanResult> = withContext(io) {
@@ -30,7 +32,8 @@ class ScanMonitoredAppsUseCase(
 
         /* 1. Capture (PackageInfo, ApplicationInfo?) pairs --------------- */
         val installed: List<Pair<PackageInfo, ApplicationInfo?>> =
-            pm.getInstalledPackages(0) /* API‑33+: use flagsOf(0L) */
+            pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
+                /* API‑33+: use flagsOf(PackageManager.GET_PERMISSIONS.toLong()) */
                 .map { pkg -> pkg to pkg.applicationInfo }                  // nullable by design
 
         /* 2. Build result list ------------------------------------------- */
@@ -48,6 +51,7 @@ class ScanMonitoredAppsUseCase(
                 else
                     MonitoredStatus.INSTALLED_DISABLED
 
+                val (score, reason) = riskScorer.score(pkgInfo, now)
                 ScanResult(
                     meta            = meta,
                     status          = status,
@@ -55,7 +59,9 @@ class ScanMonitoredAppsUseCase(
                     versionCode     = pkgInfo.longVersionCode,
                     firstInstallTime= pkgInfo.firstInstallTime,
                     lastUpdateTime  = pkgInfo.lastUpdateTime,
-                    scannedAt       = now
+                    scannedAt       = now,
+                    riskScore       = score,
+                    riskReason      = reason
                 )
             } else {
                 ScanResult(meta, MonitoredStatus.NOT_INSTALLED, scannedAt = now)
