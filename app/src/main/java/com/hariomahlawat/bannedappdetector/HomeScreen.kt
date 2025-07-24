@@ -116,8 +116,9 @@ fun HomeScreen(
                 onScanFinished   = viewModel::onScanAnimationFinished,
                 onViewResults    = onViewResults,
                 onViewBannedApps = onViewBannedApps,
+                onIncludeUnwantedChange = viewModel::setIncludeUnwanted,
                 dark             = dark,
-                modifier         = Modifier.padding(padding)   // scaffold inset
+                modifier         = Modifier.padding(padding)
             )
         }
         if (showUpdateDialog) {
@@ -134,6 +135,7 @@ private fun HomeContent(
     onScanFinished: () -> Unit,
     onViewResults: () -> Unit,
     onViewBannedApps: () -> Unit,
+    onIncludeUnwantedChange: (Boolean) -> Unit,
     dark: Boolean,
     modifier: Modifier = Modifier            // new param
 ) {
@@ -180,13 +182,26 @@ private fun HomeContent(
 
             ElevatedAssistChip(
                 onClick = onViewBannedApps,
-                label = { Text("Browse Army Banned Apps") },
+                label = { Text("Browse Monitored Apps") },
                 leadingIcon = { Icon(Icons.Default.ArrowForward, contentDescription = null) }
             )
             Spacer(Modifier.height(32.dp))
 
             /* ---------- trust / privacy chips ---------- */
             TrustChipsRow(dark)
+            Spacer(Modifier.height(20.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Switch(
+                    checked = state.includeUnwanted,
+                    onCheckedChange = onIncludeUnwantedChange
+                )
+                Spacer(Modifier.width(8.dp))
+                Text("Include Unwanted Apps", style = MaterialTheme.typography.bodyMedium)
+            }
+
             Spacer(Modifier.height(28.dp))
 
             /* scan button */

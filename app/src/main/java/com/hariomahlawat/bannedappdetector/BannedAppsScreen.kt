@@ -32,6 +32,7 @@ import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
 import com.hariomahlawat.bannedappdetector.util.setSystemBars
 import kotlinx.coroutines.launch
 import com.hariomahlawat.bannedappdetector.bannedAppsAZ
+import com.hariomahlawat.bannedappdetector.unwantedAppsAZ
 
 /* ---------- public entry ---------- */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,6 +44,7 @@ fun BannedAppsScreen(
     val searchQuery = remember { mutableStateOf("") }
     val listState   = rememberLazyListState()
     val scope       = rememberCoroutineScope()
+    var selectedTab by remember { mutableStateOf(0) }
 
     setSystemBars(
         color     = if (dark) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
@@ -103,11 +105,17 @@ fun BannedAppsScreen(
                     onValueChange = { searchQuery.value = it }
                 )
 
+                TabRow(selectedTabIndex = selectedTab) {
+                    Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) { Text("Banned") }
+                    Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) { Text("Unwanted") }
+                }
+
                 Spacer(Modifier.height(4.dp))
 
                 // NOW this is inside ColumnScope so weight() works
+                val buckets = if (selectedTab == 0) bannedAppsAZ else unwantedAppsAZ
                 BannedAppsList(
-                    buckets   = bannedAppsAZ,
+                    buckets   = buckets,
                     query     = searchQuery.value,
                     listState = listState,
                     modifier  = Modifier.weight(1f)

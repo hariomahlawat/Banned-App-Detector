@@ -7,7 +7,7 @@ import com.hariomahlawat.bannedappdetector.ThemeSetting
 import kotlinx.coroutines.flow.Flow
 
 interface MonitoredAppsRepository {
-    fun getMonitoredApps(): List<MonitoredAppMeta>
+    fun getMonitoredApps(includeUnwanted: Boolean = false): List<MonitoredAppMeta>
 }
 
 interface ScanResultsRepository {

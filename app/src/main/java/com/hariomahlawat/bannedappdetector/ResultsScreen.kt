@@ -141,7 +141,9 @@ private fun ResultsBody(
             Spacer(Modifier.height(24.dp))
 
             val total = state.summary?.totalMonitored ?: 0
-            val banned = state.results.size
+            val bannedList = state.results.filter { it.meta.category == AppCategory.BANNED }
+            val unwantedList = state.results.filter { it.meta.category == AppCategory.UNWANTED }
+            val banned = bannedList.size
             val scanned = state.lastScanAt?.let {
                 DateFormat.getDateTimeInstance().format(Date(it))
             } ?: "--"
@@ -163,26 +165,47 @@ private fun ResultsBody(
                 SummaryCard(
                     total = total,
                     banned = banned,
+                    unwanted = unwantedList.size,
                     scanTime = scanned,
                     deviceInfo = deviceInfo
                 )
             }
         }
 
-        stickyHeader {
-            Text(
-                text = "DETECTED BANNED APPS",
-                style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 1.sp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .padding(horizontal = 20.dp, vertical = 8.dp)
-            )
+        if (bannedList.isNotEmpty()) {
+            stickyHeader {
+                Text(
+                    text = "DETECTED BANNED APPS",
+                    style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 1.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                )
+            }
+
+            items(bannedList) { result ->
+                BannedAppRow(result)
+            }
         }
 
-        items(state.results) { result ->
-            BannedAppRow(result)
+        if (unwantedList.isNotEmpty()) {
+            stickyHeader {
+                Text(
+                    text = "DETECTED UNWANTED APPS",
+                    style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 1.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                )
+            }
+
+            items(unwantedList) { result ->
+                BannedAppRow(result)
+            }
         }
 
         item { Spacer(Modifier.height(48.dp)) }
@@ -194,6 +217,7 @@ private fun ResultsBody(
 private fun SummaryCard(
     total: Int,
     banned: Int,
+    unwanted: Int,
     scanTime: String,
     deviceInfo: DeviceInfo
 ) {
@@ -214,6 +238,13 @@ private fun SummaryCard(
                     label = "BANNED",
                     icon = Icons.Default.Warning,
                     tint = ErrorRed,
+                    modifier = Modifier.weight(1f)
+                )
+                MetricTile(
+                    value = unwanted.toString(),
+                    label = "UNWANTED",
+                    icon = Icons.Default.Warning,
+                    tint = BrandGold,
                     modifier = Modifier.weight(1f)
                 )
                 MetricTile(
