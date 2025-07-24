@@ -16,7 +16,9 @@ data class AppMetadata(
     val lastUpdateTime: Long?,
     val developerName: String?,
     val rating: Float?,
-    val downloads: Long?
+    val downloads: Long?,
+    val publisherName: String?,
+    val reviews: List<String>?
 )
 
 /** Collects [AppMetadata] from [PackageInfo]. */
@@ -38,6 +40,13 @@ class AppMetadataCollector(private val pm: PackageManager) {
         val rating: Float? = null
         val downloads: Long? = null
 
+        // Publisher information is unavailable offline; return null for now
+        val publisher: String? = null
+
+        // Reviews would typically be fetched from Play Store. When offline we
+        // have no access so provide an empty list.
+        val reviews: List<String>? = emptyList()
+
         return AppMetadata(
             packageName = packageName,
             versionName = versionName,
@@ -47,7 +56,9 @@ class AppMetadataCollector(private val pm: PackageManager) {
             lastUpdateTime = lastUpdate,
             developerName = developer,
             rating = rating,
-            downloads = downloads
+            downloads = downloads,
+            publisherName = publisher,
+            reviews = reviews
         )
     }
 }

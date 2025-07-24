@@ -11,11 +11,12 @@ import com.hariomahlawat.bannedappdetector.metadata.AppMetadataCollector
  * Scores are from 0-100 based on requested dangerous permissions
  * and how long ago the app was updated.
  */
-class RiskScoreCalculator(private val pm: PackageManager) {
+class RiskScoreCalculator(private val pm: PackageManager? = null) {
 
     private val extractor = RiskSignalsExtractor()
 
     fun score(pkgInfo: PackageInfo, now: Long): Pair<Int, String> {
+        requireNotNull(pm) { "PackageManager required for scoring PackageInfo" }
         val meta = AppMetadataCollector(pm).collect(pkgInfo)
         return score(meta, now)
     }
@@ -55,6 +56,18 @@ class RiskScoreCalculator(private val pm: PackageManager) {
         if (signals.developerReputation < 0.3f) {
             score += 5f
             reasons += "unverified developer"
+        }
+
+        if (signals.publisherReputation < 0.3f) {
+            score += 5f
+            reasons += "unverified publisher"
+        }
+
+        signals.negativeReviewRatio?.let {
+            if (it > 0.3f) {
+                score += it * 20f
+                reasons += "many negative reviews"
+            }
         }
 
         val final = score.toInt().coerceIn(0, 100)

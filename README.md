@@ -51,4 +51,4 @@ You can also open the project in Android Studio and click **Run** to deploy.
 
 ## AI-based Risk Scanning
 
-See [docs/AI-App-Scanning-Plan.md](docs/AI-App-Scanning-Plan.md) for a proposal on integrating an AI model to assess the risk of installed apps alongside the static banned list.
+See [docs/AI-App-Scanning-Plan.md](docs/AI-App-Scanning-Plan.md) for a proposal on integrating an AI model to assess the risk of installed apps alongside the static banned list. The current implementation ships with a lightweight local sentiment analyser that estimates the ratio of negative reviews and factors it into the risk score.
