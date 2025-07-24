@@ -20,7 +20,9 @@ data class ScanResult(
     val versionCode: Long? = null,
     val firstInstallTime: Long? = null,
     val lastUpdateTime: Long? = null,
-    val scannedAt: Long
+    val scannedAt: Long,
+    val riskScore: Int? = null,
+    val riskReason: String? = null
 )
 
 data class SummaryStats(

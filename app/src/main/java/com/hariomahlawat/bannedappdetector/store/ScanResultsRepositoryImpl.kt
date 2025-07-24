@@ -56,6 +56,8 @@ class ScanResultsRepositoryImpl @Inject constructor(
                 put("first", r.firstInstallTime)
                 put("last", r.lastUpdateTime)
                 put("at", r.scannedAt)
+                put("risk", r.riskScore)
+                put("reason", r.riskReason)
             }
             arr.put(o)
         }
@@ -76,7 +78,9 @@ class ScanResultsRepositoryImpl @Inject constructor(
                 versionCode = if (o.isNull("verCode")) null else o.getLong("verCode"),
                 firstInstallTime = if (o.isNull("first")) null else o.getLong("first"),
                 lastUpdateTime = if (o.isNull("last")) null else o.getLong("last"),
-                scannedAt = o.getLong("at")
+                scannedAt = o.getLong("at"),
+                riskScore = if (o.isNull("risk")) null else o.getInt("risk"),
+                riskReason = o.optString("reason", null)
             )
         }
         return out
