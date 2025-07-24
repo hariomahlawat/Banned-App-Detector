@@ -361,6 +361,14 @@ private fun BannedAppRow(result: ScanResult) {
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        result.riskReason?.let { reason ->
+                            Spacer(Modifier.height(2.dp))
+                            Text(
+                                reason,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             },
@@ -369,3 +377,4 @@ private fun BannedAppRow(result: ScanResult) {
         )
     }
 }
+
