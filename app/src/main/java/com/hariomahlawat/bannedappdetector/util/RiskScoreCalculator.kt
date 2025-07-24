@@ -3,6 +3,7 @@ package com.hariomahlawat.bannedappdetector.util
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.Manifest
+import com.hariomahlawat.bannedappdetector.metadata.AppMetadata
 
 /**
  * Simple heuristic based risk scoring for installed apps.
@@ -11,38 +12,60 @@ import android.Manifest
  */
 class RiskScoreCalculator(private val pm: PackageManager) {
 
+    private val extractor = RiskSignalsExtractor()
+
     fun score(pkgInfo: PackageInfo, now: Long): Pair<Int, String> {
-        var score = 0
+        val meta = AppMetadataCollector(pm).collect(pkgInfo)
+        return score(meta, now)
+    }
+
+    /** Score an app based on extracted [RiskSignals]. */
+    fun score(meta: AppMetadata, now: Long): Pair<Int, String> {
+        val signals = extractor.extract(meta, now)
+
+        var score = 0f
         val reasons = mutableListOf<String>()
 
-        val perms = pkgInfo.requestedPermissions
-        if (perms != null) {
-            val dangerous = perms.count { it in DANGEROUS_PERMISSIONS }
-            if (dangerous > 0) {
-                score += dangerous * 10
-                reasons += "$dangerous sensitive permissions"
+        if (signals.dangerousPermissions > 0) {
+            score += signals.dangerousPermissions * 10
+            reasons += "${signals.dangerousPermissions} sensitive permissions"
+        }
+
+        if (signals.daysSinceUpdate > OLD_THRESHOLD_DAYS) {
+            score += 10f
+            reasons += "not updated for ${signals.daysSinceUpdate/30} months"
+        }
+
+        signals.rating?.let {
+            if (it < 3.0f) {
+                score += (3.0f - it) * 10
+                reasons += "low user rating"
             }
         }
 
-        val lastUpdate = pkgInfo.lastUpdateTime
-        if (lastUpdate > 0) {
-            val days = (now - lastUpdate) / MILLIS_PER_DAY
-            if (days > OLD_THRESHOLD_DAYS) {
-                score += 10
-                reasons += "not updated for ${days/30} months"
+        // downloads: if low popularity, slightly increase score
+        signals.downloads?.let {
+            if (it < 10_000) {
+                score += 5f
+                reasons += "low install count"
             }
         }
 
-        val final = score.coerceIn(0, 100)
+        if (signals.developerReputation < 0.3f) {
+            score += 5f
+            reasons += "unverified developer"
+        }
+
+        val final = score.toInt().coerceIn(0, 100)
         val reason = if (reasons.isEmpty()) "low risk" else reasons.joinToString("; ")
         return final to reason
     }
 
     companion object {
-        private const val MILLIS_PER_DAY = 24 * 60 * 60 * 1000L
-        private const val OLD_THRESHOLD_DAYS = 180
+        internal const val MILLIS_PER_DAY = 24 * 60 * 60 * 1000L
+        internal const val OLD_THRESHOLD_DAYS = 180
 
-        private val DANGEROUS_PERMISSIONS = setOf(
+        internal val DANGEROUS_PERMISSIONS = setOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.READ_CONTACTS,
