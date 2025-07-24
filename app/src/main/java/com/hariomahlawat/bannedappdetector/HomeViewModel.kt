@@ -23,7 +23,7 @@ data class HomeUiState(
     val message: String? = null,
     val showMonitoredDialog: Boolean = false,
     val monitoredApps: List<MonitoredAppMeta> = emptyList(),
-    val includeUnwanted: Boolean = false
+    val includeUnwanted: Boolean = true
 )
 
 @HiltViewModel
@@ -35,7 +35,10 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
-        HomeUiState(monitoredApps = monitoredRepo.getMonitoredApps())
+        HomeUiState(
+            monitoredApps = monitoredRepo.getMonitoredApps(includeUnwanted = true),
+            includeUnwanted = true
+        )
     )
     val state: StateFlow<HomeUiState> = _state.asStateFlow()
 
