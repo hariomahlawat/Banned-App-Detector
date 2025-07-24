@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
@@ -42,7 +43,6 @@ import java.util.*
 
 private val ErrorRed = Color(0xFFE53935)
 
-/* ---------- screen ---------- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResultsScreen(
@@ -107,14 +107,12 @@ fun ResultsScreen(
             },
             containerColor = Color.Transparent
         ) { padding ->
-
             Box(modifier = Modifier.fillMaxSize()) {
                 ResultsBody(
                     state = state,
                     deviceInfo = device,
                     contentPadding = padding
                 )
-
                 AppInfoFooter(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -125,7 +123,6 @@ fun ResultsScreen(
     }
 }
 
-/* ---------- list + header ---------- */
 @Composable
 private fun ResultsBody(
     state: HomeUiState,
@@ -134,6 +131,7 @@ private fun ResultsBody(
 ) {
     val bannedList = state.results.filter { it.meta.category == AppCategory.BANNED }
     val unwantedList = state.results.filter { it.meta.category == AppCategory.UNWANTED }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -185,7 +183,6 @@ private fun ResultsBody(
                         .padding(horizontal = 20.dp, vertical = 8.dp)
                 )
             }
-
             items(bannedList) { result ->
                 BannedAppRow(result)
             }
@@ -203,7 +200,6 @@ private fun ResultsBody(
                         .padding(horizontal = 20.dp, vertical = 8.dp)
                 )
             }
-
             items(unwantedList) { result ->
                 BannedAppRow(result)
             }
@@ -213,7 +209,6 @@ private fun ResultsBody(
     }
 }
 
-/* ---------- summary card ---------- */
 @Composable
 private fun SummaryCard(
     total: Int,
@@ -230,33 +225,31 @@ private fun SummaryCard(
         tonalElevation = 1.dp
     ) {
         Column(Modifier.padding(16.dp)) {
-
+            // metrics laid out as vertical tiles
             Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 MetricTile(
                     value = banned.toString(),
                     label = "BANNED",
                     icon = Icons.Default.Warning,
                     tint = ErrorRed,
-                    modifier = Modifier.weight(1f)
                 )
                 MetricTile(
                     value = if (includeUnwanted) unwanted.toString() else "--",
                     label = "UNWANTED",
                     icon = Icons.Default.Warning,
                     tint = BrandGold,
-                    modifier = Modifier.weight(1f)
                 )
                 MetricTile(
                     value = total.toString(),
                     label = "SCANNED",
                     icon = Icons.Default.Inbox,
                     tint = BrandGold,
-                    modifier = Modifier.weight(1f)
                 )
             }
+
             if (!includeUnwanted) {
                 Spacer(Modifier.height(8.dp))
                 Text(
@@ -269,25 +262,8 @@ private fun SummaryCard(
             Spacer(Modifier.height(12.dp))
             Text("Scan time: $scanTime", style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(8.dp))
-            HorizontalDivider()
+            Divider()
             Spacer(Modifier.height(8.dp))
-
-            // helper row for device info
-            @Composable
-            fun DeviceLine(label: String, data: String) {
-                Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        label,
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        data,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.weight(2f)
-                    )
-                }
-            }
 
             DeviceLine("Device", "${deviceInfo.manufacturer} ${deviceInfo.model}")
             DeviceLine("Android ID", deviceInfo.androidId)
@@ -296,37 +272,57 @@ private fun SummaryCard(
     }
 }
 
-/* ---------- metric tile ---------- */
 @Composable
 private fun MetricTile(
     value: String,
     label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     tint: Color,
-    modifier: Modifier = Modifier
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .clip(MaterialTheme.shapes.medium)
-            .background(Color.White.copy(alpha = .12f))
-            .padding(horizontal = 12.dp, vertical = 10.dp)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .widthIn(min = 0.dp, max = 80.dp)
+            .padding(horizontal = 4.dp, vertical = 8.dp)
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(24.dp),
             tint = tint
         )
-        Spacer(Modifier.width(6.dp))
-        Column {
-            Text(value, style = MaterialTheme.typography.bodyLarge, color = tint)
-            Text(label, style = MaterialTheme.typography.labelMedium)
-        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            color = tint
+        )
+        Spacer(Modifier.height(2.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
-/* ---------- list row ---------- */
+@Composable
+private fun DeviceLine(label: String, data: String) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            data,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.weight(2f)
+        )
+    }
+}
+
 @Composable
 private fun BannedAppRow(result: ScanResult) {
     Surface(
