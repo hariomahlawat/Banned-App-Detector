@@ -8,7 +8,9 @@ data class RiskSignals(
     val daysSinceUpdate: Long,
     val rating: Float?,
     val downloads: Long?,
-    val developerReputation: Float
+    val developerReputation: Float,
+    val publisherReputation: Float,
+    val negativeReviewRatio: Float?
 )
 
 class RiskSignalsExtractor {
@@ -18,12 +20,19 @@ class RiskSignalsExtractor {
         val days = meta.lastUpdateTime?.let { (now - it) / RiskScoreCalculator.MILLIS_PER_DAY } ?: 0L
         // Developer reputation and popularity require external data. We default to neutral values.
         val reputation = if (meta.developerName != null) 0.5f else 0.0f
+        val publisherRep = if (meta.publisherName != null) 0.5f else 0.0f
+
+        val reviewRatio = meta.reviews?.let {
+            ReviewSentimentAnalyzer().negativeRatio(it)
+        }
         return RiskSignals(
             dangerousPermissions = dangerous,
             daysSinceUpdate = days,
             rating = meta.rating,
             downloads = meta.downloads,
-            developerReputation = reputation
+            developerReputation = reputation,
+            publisherReputation = publisherRep,
+            negativeReviewRatio = reviewRatio
         )
     }
 }
