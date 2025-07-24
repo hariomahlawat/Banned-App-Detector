@@ -132,6 +132,8 @@ private fun ResultsBody(
     deviceInfo: DeviceInfo,
     contentPadding: PaddingValues
 ) {
+    val bannedList = state.results.filter { it.meta.category == AppCategory.BANNED }
+    val unwantedList = state.results.filter { it.meta.category == AppCategory.UNWANTED }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -141,8 +143,6 @@ private fun ResultsBody(
             Spacer(Modifier.height(24.dp))
 
             val total = state.summary?.totalMonitored ?: 0
-            val bannedList = state.results.filter { it.meta.category == AppCategory.BANNED }
-            val unwantedList = state.results.filter { it.meta.category == AppCategory.UNWANTED }
             val banned = bannedList.size
             val scanned = state.lastScanAt?.let {
                 DateFormat.getDateTimeInstance().format(Date(it))
