@@ -4,6 +4,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.Manifest
 import com.hariomahlawat.bannedappdetector.metadata.AppMetadata
+import com.hariomahlawat.bannedappdetector.metadata.AppMetadataCollector
 
 /**
  * Simple heuristic based risk scoring for installed apps.
