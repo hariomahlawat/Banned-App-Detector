@@ -5,6 +5,10 @@ about potentially dangerous apps on the device. The goal is to augment the
 existing static banned list with a data-driven approach that reduces false
 positives and negatives.
 
+**Status:** A basic metadata collector and heuristic risk scorer are now
+implemented. Ratings and download counts remain stubbed until Play Store data is
+available.
+
 ## Overview
 
 1. **Collect App Metadata** – For each installed app gather metadata such as
@@ -47,4 +51,5 @@ To build the model you would need a dataset containing:
 3. Cache results locally so the scan is quick and offline.
 4. Update the UI to present the risk score alongside the monitored status.
 5. Continuously refine the model with new data to keep detection robust.
+
 
