@@ -166,6 +166,7 @@ private fun ResultsBody(
                     total = total,
                     banned = banned,
                     unwanted = unwantedList.size,
+                    includeUnwanted = state.includeUnwanted,
                     scanTime = scanned,
                     deviceInfo = deviceInfo
                 )
@@ -218,6 +219,7 @@ private fun SummaryCard(
     total: Int,
     banned: Int,
     unwanted: Int,
+    includeUnwanted: Boolean,
     scanTime: String,
     deviceInfo: DeviceInfo
 ) {
@@ -241,7 +243,7 @@ private fun SummaryCard(
                     modifier = Modifier.weight(1f)
                 )
                 MetricTile(
-                    value = unwanted.toString(),
+                    value = if (includeUnwanted) unwanted.toString() else "--",
                     label = "UNWANTED",
                     icon = Icons.Default.Warning,
                     tint = BrandGold,
@@ -253,6 +255,14 @@ private fun SummaryCard(
                     icon = Icons.Default.Inbox,
                     tint = BrandGold,
                     modifier = Modifier.weight(1f)
+                )
+            }
+            if (!includeUnwanted) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Unwanted apps were not scanned",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
