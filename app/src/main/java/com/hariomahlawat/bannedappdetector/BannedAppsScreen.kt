@@ -68,7 +68,7 @@ fun BannedAppsScreen(
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 TopAppBar(
-                    title = { Text("Army Banned Apps") },
+                    title = { Text("Banned & Unwanted Apps") },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
                             Icon(Icons.Default.ArrowBack, contentDescription = "Back")

@@ -216,6 +216,17 @@ private fun HomeContent(
 
             Spacer(Modifier.height(12.dp))
 
+            // Browse Monitored Apps button
+            ElevatedAssistChip(
+                onClick = onViewBannedApps,
+                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = {
+                    Icon(Icons.Default.ArrowForward, contentDescription = null)
+                },
+                label = { Text("Browse Monitored Apps") }
+            )
+
+            Spacer(Modifier.height(12.dp))
             // "Include Unwanted" toggle remains here
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Switch(

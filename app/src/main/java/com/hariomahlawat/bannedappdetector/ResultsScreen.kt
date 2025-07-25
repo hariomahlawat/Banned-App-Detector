@@ -332,49 +332,22 @@ private fun BannedAppRow(result: ScanResult) {
             .glassCard(Color.Black.copy(alpha = .40f))
     ) {
         ListItem(
-            leadingContent = {
-                Icon(
-                    imageVector = Icons.Default.Block,
-                    contentDescription = null,
-                    modifier = Modifier.size(28.dp),
-                    tint = ErrorRed
-                )
-            },
             headlineContent = {
                 Text(
-                    result.meta.displayName,
+                    text = result.meta.displayName,
                     color = BrandGold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             },
-            supportingContent = {
-                Text(result.meta.packageName, style = MaterialTheme.typography.bodySmall)
-            },
             trailingContent = {
-                Column(horizontalAlignment = Alignment.End) {
-                    StatusChip(result.status)
-                    result.riskScore?.let {
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            "Risk: $it",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        result.riskReason?.let { reason ->
-                            Spacer(Modifier.height(2.dp))
-                            Text(
-                                reason,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
+                // Only show enabled/disabled status
+                StatusChip(result.status)
             },
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-            modifier = Modifier.heightIn(min = 72.dp)
+            modifier = Modifier.heightIn(min = 56.dp)
         )
     }
 }
+
 
