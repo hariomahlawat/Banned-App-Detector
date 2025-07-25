@@ -90,7 +90,12 @@ fun PermissionRiskScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("AI Scan Results", style = MaterialTheme.typography.headlineSmall) },
+                    title = {
+                        Text(
+                            "AI-Based Privacy Scan",
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                    },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
                             Icon(
