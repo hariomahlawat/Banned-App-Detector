@@ -91,6 +91,7 @@ fun ScanButton(
 fun HomeScreen(
     onViewResults: () -> Unit,
     onViewBannedApps: () -> Unit,
+    onAiScan: () -> Unit,
     onToggleTheme: () -> Unit,
     dark: Boolean,
     viewModel: HomeViewModel = hiltViewModel(),
@@ -147,6 +148,7 @@ fun HomeScreen(
                 onScanFinished          = viewModel::onScanAnimationFinished,
                 onViewResults           = onViewResults,
                 onViewBannedApps        = onViewBannedApps,
+                onAiScan                = onAiScan,
                 onIncludeUnwantedChange = viewModel::setIncludeUnwanted,
                 dark                    = dark,
                 modifier                = Modifier.padding(padding)
@@ -166,6 +168,7 @@ private fun HomeContent(
     onScanFinished: () -> Unit,
     onViewResults: () -> Unit,
     onViewBannedApps: () -> Unit,
+    onAiScan: () -> Unit,
     onIncludeUnwantedChange: (Boolean) -> Unit,
     dark: Boolean,
     modifier: Modifier = Modifier
@@ -202,24 +205,11 @@ private fun HomeContent(
             Spacer(Modifier.height(16.dp))
 
             Text(
-                text      = "Precision Scan",
-                style     = MaterialTheme.typography.displaySmall,
-                color     = BrandGold,
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text      = "for Banned Apps",
+                text      = "Quick Banned App Scan",
                 style     = MaterialTheme.typography.headlineMedium,
                 color     = BrandGold,
-                textAlign = TextAlign.Center
-            )
-
-            Text(
-                "Local analysis. Targeted detection.",
-                style     = MaterialTheme.typography.bodyMedium,
-                color     = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center,
-                modifier  = Modifier.padding(top = 8.dp, bottom = 16.dp)
+                modifier  = Modifier.padding(bottom = 16.dp)
             )
 
             ElevatedAssistChip(
@@ -256,6 +246,16 @@ private fun HomeContent(
                 onClick    = onScan,
                 modifier   = Modifier.fillMaxWidth()
             )
+
+            Spacer(Modifier.height(12.dp))
+
+            Button(
+                onClick = onAiScan,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !state.isScanning
+            ) {
+                Text("AI Scan")
+            }
 
             Spacer(Modifier.height(24.dp))
 

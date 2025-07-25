@@ -16,6 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import com.hariomahlawat.bannedappdetector.ui.theme.BannedAppDetectorTheme
 import com.hariomahlawat.bannedappdetector.ThemeViewModel
 import com.hariomahlawat.bannedappdetector.ThemeSetting
+import com.hariomahlawat.bannedappdetector.permission.PermissionRiskScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -51,6 +52,7 @@ fun AppNavigation(theme: ThemeSetting, onToggleTheme: () -> Unit) {
             HomeScreen(
                 onViewResults    = { navController.navigate("results") },
                 onViewBannedApps = { navController.navigate("bannedApps") },
+                onAiScan        = { navController.navigate("aiScan") },
                 onToggleTheme    = onToggleTheme,
                 dark             = dark
             )
@@ -69,6 +71,15 @@ fun AppNavigation(theme: ThemeSetting, onToggleTheme: () -> Unit) {
                        (theme == ThemeSetting.SYSTEM &&
                         androidx.compose.foundation.isSystemInDarkTheme())
             BannedAppsScreen(
+                onBack = { navController.popBackStack() },
+                dark   = dark
+            )
+        }
+        composable("aiScan") {
+            val dark = theme == ThemeSetting.DARK ||
+                       (theme == ThemeSetting.SYSTEM &&
+                        androidx.compose.foundation.isSystemInDarkTheme())
+            PermissionRiskScreen(
                 onBack = { navController.popBackStack() },
                 dark   = dark
             )
