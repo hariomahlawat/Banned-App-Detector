@@ -227,10 +227,15 @@ private fun HomeContent(
                     checked = state.includeUnwanted,
                     onCheckedChange = onIncludeUnwantedChange,
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = MaterialTheme.colorScheme.primary,
-                        uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        // thumb
+                        checkedThumbColor   = MaterialTheme.colorScheme.primary,
+                        uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        // track
+                        checkedTrackColor   = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                        uncheckedTrackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
                     )
                 )
+
                 Spacer(Modifier.width(8.dp))
                 Text(
                     "Include Unwanted Apps",
