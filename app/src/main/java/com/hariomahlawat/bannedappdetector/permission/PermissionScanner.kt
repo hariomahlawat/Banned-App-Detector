@@ -20,6 +20,13 @@ class PermissionScanner(private val context: Context) {
     private val trustedApps: List<String> by lazy { loadListFromAsset("trusted_apps.json") }
     private val chinesePublishers: List<String> by lazy { loadListFromAsset("chinese_publishers.json") }
 
+    private val officialInstallers = setOf(
+        "com.android.vending",
+        "com.google.android.packageinstaller",
+        "com.android.packageinstaller",
+        "com.sec.android.app.samsungapps"
+    )
+
     fun scanInstalledApps(): List<AppRiskReport> {
         val packages = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
             .filter { pkg ->
@@ -35,8 +42,7 @@ class PermissionScanner(private val context: Context) {
                 packageName = pkg.packageName,
                 permissions = perms
             )
-            val report = analyzeRisk(app)
-            report
+            analyzeRisk(app)
         }
     }
 
@@ -46,7 +52,22 @@ class PermissionScanner(private val context: Context) {
         val low = app.permissions.filter { permissionMap[it]?.risk == "LOW" }
         val chinese = isChineseOrigin(app.packageName)
         val score = computeRiskScore(high, medium, low, app.packageName, chinese)
-        return AppRiskReport(app, high, medium, low, chinese, score)
+
+        val background = app.permissions.filter { permissionMap[it]?.type == "PASSIVE" }
+        val sideloaded = isSideloaded(app.packageName)
+        val modded = looksLikeModApp(app.appName, app.packageName)
+
+        return AppRiskReport(
+            app = app,
+            highRiskPermissions = high,
+            mediumRiskPermissions = medium,
+            lowRiskPermissions = low,
+            chineseOrigin = chinese,
+            riskScore = score,
+            sideloaded = sideloaded,
+            modApp = modded,
+            backgroundPermissions = background
+        )
     }
 
     private fun computeRiskScore(high: List<String>, medium: List<String>, low: List<String>, packageName: String, chinese: Boolean): Int {
@@ -79,6 +100,26 @@ class PermissionScanner(private val context: Context) {
             list += array.getString(i)
         }
         return list
+    }
+
+    private fun isSideloaded(packageName: String): Boolean {
+        val installer = pm.getInstallerPackageName(packageName)
+        return installer == null || installer !in officialInstallers
+    }
+
+    private fun looksLikeModApp(appName: String, packageName: String): Boolean {
+        val text = (appName + packageName).lowercase()
+        return listOf("mod", "patched", "crack", "hack").any { it in text }
+    }
+
+    fun isDeveloperOptionsEnabled(): Boolean {
+        return try {
+            Settings.Global.getInt(
+                context.contentResolver,
+                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+                0
+            ) != 0
+        } catch (_: Exception) { false }
     }
 
     private fun assetToString(name: String): String {
@@ -119,5 +160,8 @@ data class AppRiskReport(
     val mediumRiskPermissions: List<String>,
     val lowRiskPermissions: List<String>,
     val chineseOrigin: Boolean,
-    val riskScore: Int
+    val riskScore: Int,
+    val sideloaded: Boolean,
+    val modApp: Boolean,
+    val backgroundPermissions: List<String>
 )

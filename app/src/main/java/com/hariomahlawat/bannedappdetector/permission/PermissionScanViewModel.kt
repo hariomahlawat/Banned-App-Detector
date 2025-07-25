@@ -15,7 +15,8 @@ import javax.inject.Inject
 data class PermissionScanState(
     val isScanning: Boolean = false,
     val results: List<AppRiskReport> = emptyList(),
-    val summary: PermissionScanSummary? = null
+    val summary: PermissionScanSummary? = null,
+    val developerOptionsEnabled: Boolean = false
 )
 
 data class PermissionScanSummary(
@@ -39,6 +40,7 @@ class PermissionScanViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = PermissionScanState(isScanning = true)
             val results = withContext(io) { scanner.scanInstalledApps() }
+            val devOptions = scanner.isDeveloperOptionsEnabled()
             val summary = PermissionScanSummary(
                 total = results.size,
                 highRisk = results.count { it.highRiskPermissions.isNotEmpty() },
@@ -53,7 +55,8 @@ class PermissionScanViewModel @Inject constructor(
             _state.value = PermissionScanState(
                 isScanning = false,
                 results = results,
-                summary = summary
+                summary = summary,
+                developerOptionsEnabled = devOptions
             )
         }
     }
