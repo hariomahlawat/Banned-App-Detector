@@ -67,6 +67,10 @@ false positives.
 From the home screen you can launch this scan via the **AI Scan** button,
 which lists installed apps with their permission risk score.
 
+System applications and services are automatically filtered out so the report
+focuses on third‑party packages only. While scanning is in progress the screen
+shows a loading indicator.
+
 The asset files are stored in `src/main/assets`:
 
 - `permissions.json` – mapping of permission to risk level
