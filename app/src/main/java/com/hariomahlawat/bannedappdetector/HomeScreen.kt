@@ -27,8 +27,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hariomahlawat.bannedappdetector.components.AppInfoFooter
-import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientEnd
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
+import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientEnd
 import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
 import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
@@ -38,6 +38,9 @@ import com.hariomahlawat.bannedappdetector.util.setSystemBars
 import java.text.DateFormat
 import java.util.Date
 
+/**
+ * Primary scan button with built‑in progress indicator.
+ */
 @Composable
 fun ScanButton(
     isAnimating: Boolean,
@@ -48,7 +51,9 @@ fun ScanButton(
     Button(
         onClick = onClick,
         enabled = !isAnimating,
-        modifier = modifier.fillMaxWidth().height(56.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp),
         contentPadding = PaddingValues(0.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
@@ -56,7 +61,9 @@ fun ScanButton(
         )
     ) {
         Box(
-            Modifier.fillMaxSize().clip(MaterialTheme.shapes.medium),
+            Modifier
+                .fillMaxSize()
+                .clip(MaterialTheme.shapes.medium),
             contentAlignment = Alignment.Center
         ) {
             if (isAnimating) {
@@ -124,8 +131,11 @@ fun HomeScreen(
                     actions = {
                         IconButton(onClick = onToggleTheme) {
                             val icon = if (dark) Icons.Default.LightMode else Icons.Default.DarkMode
-                            Icon(icon, contentDescription = "Toggle theme",
-                                tint = MaterialTheme.colorScheme.onBackground)
+                            Icon(
+                                icon,
+                                contentDescription = "Toggle theme",
+                                tint = MaterialTheme.colorScheme.onBackground
+                            )
                         }
                     }
                 )
@@ -161,28 +171,28 @@ private fun HomeContent(
     dark: Boolean,
     modifier: Modifier = Modifier
 ) {
-    // SCAN NOW animation
+    // State & animation for "Scan Now"
     var scanAnimating by remember { mutableStateOf(false) }
     val scanProgress = remember { Animatable(0f) }
     LaunchedEffect(scanAnimating) {
         if (scanAnimating) {
             scanProgress.snapTo(0f)
             scanProgress.animateTo(1f, tween(4000))
-            onScanComplete()     // navigate after 4s
+            onScanComplete()
             scanAnimating = false
         } else {
             scanProgress.snapTo(0f)
         }
     }
 
-    // AI SCAN animation
+    // State & animation for "AI Scan"
     var aiScanning by remember { mutableStateOf(false) }
     val aiProgress = remember { Animatable(0f) }
     LaunchedEffect(aiScanning) {
         if (aiScanning) {
             aiProgress.snapTo(0f)
             aiProgress.animateTo(1f, tween(4000))
-            onAiScanComplete()   // navigate after 4s
+            onAiScanComplete()
             aiScanning = false
         } else {
             aiProgress.snapTo(0f)
@@ -197,45 +207,45 @@ private fun HomeContent(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo & Title
+            // Smaller logo
             Image(
                 painter = painterResource(R.drawable.archer_logo2),
                 contentDescription = "App logo – archer",
-                modifier = Modifier.size(160.dp)
+                modifier = Modifier.size(120.dp)
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
+
             Text(
                 "Quick Banned App Scan",
                 style = MaterialTheme.typography.headlineMedium,
                 color = BrandGold,
                 textAlign = TextAlign.Center
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(8.dp))
 
             ElevatedAssistChip(
                 onClick = onViewBannedApps,
                 label = { Text("Browse Monitored Apps", color = MaterialTheme.colorScheme.onSurface) },
-                leadingIcon = { Icon(Icons.Default.ArrowForward, null, tint = MaterialTheme.colorScheme.onSurface) }
+                leadingIcon = {
+                    Icon(Icons.Default.ArrowForward, null, tint = MaterialTheme.colorScheme.onSurface)
+                }
             )
+            Spacer(Modifier.height(12.dp))
 
-            Spacer(Modifier.height(24.dp))
             TrustChipsRowEnhanced(dark)
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Switch(
                     checked = state.includeUnwanted,
                     onCheckedChange = onIncludeUnwantedChange,
                     colors = SwitchDefaults.colors(
-                        // thumb
-                        checkedThumbColor   = MaterialTheme.colorScheme.primary,
+                        checkedThumbColor = MaterialTheme.colorScheme.primary,
                         uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        // track
-                        checkedTrackColor   = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                        checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
                         uncheckedTrackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
                     )
                 )
-
                 Spacer(Modifier.width(8.dp))
                 Text(
                     "Include Unwanted Apps",
@@ -243,10 +253,9 @@ private fun HomeContent(
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
+            Spacer(Modifier.height(12.dp))
 
-            Spacer(Modifier.height(24.dp))
-
-            // SCAN NOW button + progress bar
+            // Scan Now button + progress
             ScanButton(
                 isAnimating = scanAnimating,
                 progress = scanProgress.value,
@@ -257,13 +266,14 @@ private fun HomeContent(
                 Spacer(Modifier.height(8.dp))
                 LinearProgressIndicator(
                     progress = scanProgress.value,
-                    modifier = Modifier.fillMaxWidth().height(4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp),
                     color = SuccessGreen,
                     trackColor = SuccessGreen.copy(alpha = 0.3f)
                 )
             }
-
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(16.dp))
 
             DividerWithText("Advanced Privacy Scan")
             Spacer(Modifier.height(12.dp))
@@ -272,7 +282,10 @@ private fun HomeContent(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
-                Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Icon(Icons.Default.VerifiedUser, null, tint = BrandGold, modifier = Modifier.size(32.dp))
                     Spacer(Modifier.height(8.dp))
                     Text(
@@ -289,11 +302,12 @@ private fun HomeContent(
                     )
                     Spacer(Modifier.height(12.dp))
 
-                    // AI scan button + progress
                     Button(
                         onClick = { aiScanning = true },
                         enabled = !aiScanning,
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
                         contentPadding = PaddingValues(0.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
@@ -302,48 +316,54 @@ private fun HomeContent(
                     ) {
                         Icon(Icons.Default.ArrowForward, null, tint = MaterialTheme.colorScheme.onPrimary)
                         Spacer(Modifier.width(8.dp))
-                        Text(if (aiScanning) "Scanning…" else "Start AI Scan",
-                            color = MaterialTheme.colorScheme.onPrimary)
+                        Text(
+                            if (aiScanning) "Scanning…" else "Start AI Scan",
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
                     }
                     if (aiProgress.value > 0f) {
                         Spacer(Modifier.height(8.dp))
                         LinearProgressIndicator(
                             progress = aiProgress.value,
-                            modifier = Modifier.fillMaxWidth().height(4.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(4.dp),
                             color = SuccessGreen,
                             trackColor = SuccessGreen.copy(alpha = 0.3f)
                         )
                     }
                 }
             }
+            Spacer(Modifier.height(16.dp))
 
-            Spacer(Modifier.height(24.dp))
-
+            // Show summary & footer only after a scan
             state.summary?.let {
                 SummaryCard(it, state.lastScanAt, onViewResults)
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(16.dp))
+                AppInfoFooter(modifier = Modifier.fillMaxWidth())
             }
         }
-
-        AppInfoFooter(Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp))
     }
 }
 
-// ... DividerWithText, TrustChipsRowEnhanced and SummaryCard unchanged ...
+/** Helper composables below **/
 
 @Composable
 fun DividerWithText(text: String) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Divider(Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(text, Modifier.padding(horizontal = 12.dp),
+        Text(
+            text,
+            Modifier.padding(horizontal = 12.dp),
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurface)
+            color = MaterialTheme.colorScheme.onSurface
+        )
         Divider(Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
-private fun TrustChipsRowEnhanced(dark: Boolean) {
+fun TrustChipsRowEnhanced(dark: Boolean) {
     val chipBg = if (dark)
         MaterialTheme.colorScheme.surface.copy(alpha = 0.24f)
     else
@@ -372,13 +392,14 @@ private fun TrustChipsRowEnhanced(dark: Boolean) {
 }
 
 @Composable
-private fun SummaryCard(
+fun SummaryCard(
     summary: SummaryStats,
     lastScanAt: Long?,
     onViewResults: () -> Unit
 ) {
     Surface(
-        Modifier.glassCard(MaterialTheme.colorScheme.surface.copy(alpha = 0.45f))
+        modifier = Modifier
+            .glassCard(MaterialTheme.colorScheme.surface.copy(alpha = 0.45f))
             .fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.45f)
     ) {
@@ -390,14 +411,22 @@ private fun SummaryCard(
             )
             Spacer(Modifier.height(8.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Banned apps found: ${summary.installedEnabled}",
-                    style = MaterialTheme.typography.bodyLarge, color = BrandGold)
-                Text("Disabled: ${summary.installedDisabled}",
-                    style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    "Banned apps found: ${summary.installedEnabled}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = BrandGold
+                )
+                Text(
+                    "Disabled: ${summary.installedDisabled}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
             Spacer(Modifier.height(12.dp))
-            Button(onClick = onViewResults,
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) {
+            Button(
+                onClick = onViewResults,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
                 Text("View Details", color = MaterialTheme.colorScheme.onPrimary)
             }
         }
