@@ -140,21 +140,7 @@ fun PermissionRiskScreen(
                         item {
                             SummaryCard(summary)
                             Spacer(Modifier.height(8.dp))
-                            if (state.developerOptionsEnabled) {
-                                Text(
-                                    "\u26A0 Developer options enabled - please disable",
-                                    color = WarningYellow,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(horizontal = 16.dp)
-                                )
-                            } else {
-                                Text(
-                                    "\u2705 Developer options are disabled",
-                                    color = SuccessGreen,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(horizontal = 16.dp)
-                                )
-                            }
+                            DeveloperOptionsCard(state.developerOptionsEnabled)
                             Spacer(Modifier.height(16.dp))
                         }
                     }
@@ -164,6 +150,7 @@ fun PermissionRiskScreen(
                             title = "Chinese Origin Apps",
                             count = chineseApps.size,
                             explanation = "These apps appear to be published by developers in China.",
+                            shadowColor = if (chineseApps.isEmpty()) SuccessGreen else ErrorRed,
                         ) {
                             if (chineseApps.isEmpty()) {
                                 Text(
@@ -183,6 +170,7 @@ fun PermissionRiskScreen(
                             title = "Direct APK Installs",
                             count = sideloaded.size,
                             explanation = "Apps installed from outside official stores.",
+                            shadowColor = if (sideloaded.isEmpty()) SuccessGreen else ErrorRed,
                         ) {
                             if (sideloaded.isEmpty()) {
                                 Text(
@@ -202,6 +190,7 @@ fun PermissionRiskScreen(
                             title = "Possible Mod Apps",
                             count = modded.size,
                             explanation = "These packages may have been modified or patched.",
+                            shadowColor = if (modded.isEmpty()) SuccessGreen else ErrorRed,
                         ) {
                             modded.forEach { RiskRow(it) }
                         }
@@ -212,6 +201,7 @@ fun PermissionRiskScreen(
                             title = "Apps Listening in Background",
                             count = background.size,
                             explanation = "Apps requesting background permissions like microphone or location.",
+                            shadowColor = if (background.isEmpty()) SuccessGreen else ErrorRed,
                         ) {
                             background.forEach { RiskRow(it) }
                         }
@@ -222,6 +212,7 @@ fun PermissionRiskScreen(
                             title = "High Risk Apps",
                             count = highRisk.size,
                             explanation = "Apps requesting many dangerous permissions.",
+                            shadowColor = if (highRisk.isEmpty()) SuccessGreen else ErrorRed,
                         ) {
                             highRisk.forEach { RiskRow(it) }
                         }
@@ -232,6 +223,7 @@ fun PermissionRiskScreen(
                             title = "Medium Risk Apps",
                             count = mediumRisk.size,
                             explanation = "Apps requesting some sensitive permissions.",
+                            shadowColor = if (mediumRisk.isEmpty()) SuccessGreen else ErrorRed,
                         ) {
                             mediumRisk.forEach { RiskRow(it) }
                         }
@@ -242,6 +234,7 @@ fun PermissionRiskScreen(
                             title = "Low Risk Apps",
                             count = lowRisk.size,
                             explanation = "Apps with minimal or no dangerous permissions.",
+                            shadowColor = if (lowRisk.isEmpty()) SuccessGreen else ErrorRed,
                         ) {
                             lowRisk.forEach { RiskRow(it) }
                         }
@@ -328,6 +321,7 @@ private fun RiskCategoryTile(
     title: String,
     count: Int,
     explanation: String,
+    shadowColor: Color,
     content: @Composable () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -335,7 +329,10 @@ private fun RiskCategoryTile(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
-            .glassCard(Color.Black.copy(alpha = .40f)),
+            .glassCard(
+                scrim = Color.Black.copy(alpha = .40f),
+                shadowColor = shadowColor
+            ),
         tonalElevation = 1.dp
     ) {
         Column(
@@ -375,6 +372,34 @@ private fun RiskCategoryTile(
                     content()
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun DeveloperOptionsCard(enabled: Boolean) {
+    val shadow = if (enabled) ErrorRed else SuccessGreen
+    val title = if (enabled) "Developer Options Enabled" else "Developer Options Disabled"
+    val message = if (enabled) {
+        "Having developer options active can expose your device to tampering or debugging. Disable them for better security."
+    } else {
+        "Developer options are turned off which keeps your device configuration safe from accidental changes."
+    }
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .glassCard(scrim = Color.Black.copy(alpha = .40f), shadowColor = shadow),
+        tonalElevation = 1.dp
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(title, color = BrandGold, style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(4.dp))
+            Text(
+                message,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
