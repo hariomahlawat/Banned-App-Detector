@@ -1,12 +1,16 @@
 package com.hariomahlawat.bannedappdetector.permission
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -15,6 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -121,159 +127,92 @@ fun PermissionRiskScreen(
                         }
                     }
 
-                    if (chineseApps.isNotEmpty()) {
-                        stickyHeader {
-                            Text(
-                                text = "CHINESE ORIGIN APPS",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .padding(horizontal = 20.dp, vertical = 8.dp)
-                            )
-                        }
-                        items(chineseApps) { report ->
-                            RiskRow(report)
-                        }
-                    } else {
-                        item {
-                            Text(
-                                "\u2705  No Chinese origin apps found",
-                                color = SuccessGreen,
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(16.dp)
-                            )
-                        }
-                    }
-
-                    if (sideloaded.isNotEmpty()) {
-                        stickyHeader {
-                            Text(
-                                text = "DIRECT APK INSTALLS",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .padding(horizontal = 20.dp, vertical = 8.dp)
-                            )
-                        }
-                        items(sideloaded) { RiskRow(it) }
-                    } else {
-                        item {
-                            Text(
-                                "\u2705  No sideloaded apps detected",
-                                color = SuccessGreen,
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(16.dp)
-                            )
-                        }
-                    }
-
-                    if (modded.isNotEmpty()) {
-                        stickyHeader {
-                            Text(
-                                text = "POSSIBLE MOD APPS",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .padding(horizontal = 20.dp, vertical = 8.dp)
-                            )
-                        }
-                        items(modded) { RiskRow(it) }
-                    }
-
-                    if (background.isNotEmpty()) {
-                        stickyHeader {
-                            Text(
-                                text = "APPS LISTENING IN BACKGROUND",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .padding(horizontal = 20.dp, vertical = 8.dp)
-                            )
-                        }
-                        items(background) { RiskRow(it) }
-                    }
-
-                    if (permissionMap.isNotEmpty()) {
-                        stickyHeader {
-                            Text(
-                                text = "HIGH RISK PERMISSIONS",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .padding(horizontal = 20.dp, vertical = 8.dp)
-                            )
-                        }
-                        permissionMap.forEach { (perm, apps) ->
-                            item {
+                    item {
+                        RiskCategoryTile(
+                            title = "Chinese Origin Apps",
+                            count = chineseApps.size,
+                            explanation = "These apps appear to be published by developers in China.",
+                        ) {
+                            if (chineseApps.isEmpty()) {
                                 Text(
-                                    text = perm,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                                    "\u2705  No Chinese origin apps found",
+                                    color = SuccessGreen,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(16.dp)
                                 )
-                            }
-                            items(apps) { name ->
-                                Text(
-                                    text = "- $name",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.padding(horizontal = 32.dp)
-                                )
+                            } else {
+                                chineseApps.forEach { RiskRow(it) }
                             }
                         }
                     }
 
-                    if (highRisk.isNotEmpty()) {
-                        stickyHeader {
-                            Text(
-                                text = "HIGH RISK",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .padding(horizontal = 20.dp, vertical = 8.dp)
-                            )
+                    item {
+                        RiskCategoryTile(
+                            title = "Direct APK Installs",
+                            count = sideloaded.size,
+                            explanation = "Apps installed from outside official stores.",
+                        ) {
+                            if (sideloaded.isEmpty()) {
+                                Text(
+                                    "\u2705  No sideloaded apps detected",
+                                    color = SuccessGreen,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                            } else {
+                                sideloaded.forEach { RiskRow(it) }
+                            }
                         }
-                        items(highRisk) { RiskRow(it) }
                     }
 
-                    if (mediumRisk.isNotEmpty()) {
-                        stickyHeader {
-                            Text(
-                                text = "MEDIUM RISK",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .padding(horizontal = 20.dp, vertical = 8.dp)
-                            )
+                    item {
+                        RiskCategoryTile(
+                            title = "Possible Mod Apps",
+                            count = modded.size,
+                            explanation = "These packages may have been modified or patched.",
+                        ) {
+                            modded.forEach { RiskRow(it) }
                         }
-                        items(mediumRisk) { RiskRow(it) }
                     }
 
-                    if (lowRisk.isNotEmpty()) {
-                        stickyHeader {
-                            Text(
-                                text = "LOW RISK",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .padding(horizontal = 20.dp, vertical = 8.dp)
-                            )
+                    item {
+                        RiskCategoryTile(
+                            title = "Apps Listening in Background",
+                            count = background.size,
+                            explanation = "Apps requesting background permissions like microphone or location.",
+                        ) {
+                            background.forEach { RiskRow(it) }
                         }
-                        items(lowRisk) { RiskRow(it) }
+                    }
+
+                    item {
+                        RiskCategoryTile(
+                            title = "High Risk Apps",
+                            count = highRisk.size,
+                            explanation = "Apps requesting many dangerous permissions.",
+                        ) {
+                            highRisk.forEach { RiskRow(it) }
+                        }
+                    }
+
+                    item {
+                        RiskCategoryTile(
+                            title = "Medium Risk Apps",
+                            count = mediumRisk.size,
+                            explanation = "Apps requesting some sensitive permissions.",
+                        ) {
+                            mediumRisk.forEach { RiskRow(it) }
+                        }
+                    }
+
+                    item {
+                        RiskCategoryTile(
+                            title = "Low Risk Apps",
+                            count = lowRisk.size,
+                            explanation = "Apps with minimal or no dangerous permissions.",
+                        ) {
+                            lowRisk.forEach { RiskRow(it) }
+                        }
                     }
 
                     item { Spacer(Modifier.height(48.dp)) }
@@ -349,5 +288,61 @@ private fun MetricTile(value: String, label: String, icon: ImageVector, tint: Co
         Text(text = value, style = MaterialTheme.typography.bodyLarge, color = tint)
         Spacer(Modifier.height(2.dp))
         Text(text = label, style = MaterialTheme.typography.labelSmall)
+    }
+}
+
+@Composable
+private fun RiskCategoryTile(
+    title: String,
+    count: Int,
+    explanation: String,
+    content: @Composable () -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .glassCard(Color.Black.copy(alpha = .40f)),
+        tonalElevation = 1.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = !expanded }
+                .padding(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = BrandGold,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = count.toString(),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = BrandGold
+                )
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = null,
+                    tint = BrandGold
+                )
+            }
+
+            AnimatedVisibility(expanded) {
+                Column(Modifier.padding(top = 8.dp)) {
+                    Text(
+                        explanation,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    content()
+                }
+            }
+        }
     }
 }
