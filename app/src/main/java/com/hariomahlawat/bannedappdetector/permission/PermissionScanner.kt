@@ -3,6 +3,7 @@ package com.hariomahlawat.bannedappdetector.permission
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.ApplicationInfo
 import android.net.Uri
 import android.provider.Settings
 import org.json.JSONObject
@@ -21,6 +22,12 @@ class PermissionScanner(private val context: Context) {
 
     fun scanInstalledApps(): List<AppRiskReport> {
         val packages = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
+            .filter { pkg ->
+                val info = pkg.applicationInfo
+                info != null &&
+                    info.flags and ApplicationInfo.FLAG_SYSTEM == 0 &&
+                    info.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP == 0
+            }
         return packages.map { pkg ->
             val perms = pkg.requestedPermissions?.toList() ?: emptyList()
             val app = AppPermissions(
