@@ -71,6 +71,12 @@ System applications and services are automatically filtered out so the report
 focuses on third‑party packages only. While scanning is in progress the screen
 shows a loading indicator.
 
+The results screen begins with a summary card showing how many apps were
+scanned and how many fall into the HIGH, MEDIUM and LOW categories. The card
+also highlights the number of packages originating from Chinese publishers.
+These apps are listed in a separate section. If no Chinese origin apps are
+found, a green success message is shown instead.
+
 The asset files are stored in `src/main/assets`:
 
 - `permissions.json` – mapping of permission to risk level

@@ -14,7 +14,16 @@ import javax.inject.Inject
 /** Holds state for the AI permission scan UI. */
 data class PermissionScanState(
     val isScanning: Boolean = false,
-    val results: List<AppRiskReport> = emptyList()
+    val results: List<AppRiskReport> = emptyList(),
+    val summary: PermissionScanSummary? = null
+)
+
+data class PermissionScanSummary(
+    val total: Int,
+    val highRisk: Int,
+    val mediumRisk: Int,
+    val lowRisk: Int,
+    val chinese: Int
 )
 
 @HiltViewModel
@@ -30,7 +39,22 @@ class PermissionScanViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = PermissionScanState(isScanning = true)
             val results = withContext(io) { scanner.scanInstalledApps() }
-            _state.value = PermissionScanState(isScanning = false, results = results)
+            val summary = PermissionScanSummary(
+                total = results.size,
+                highRisk = results.count { it.highRiskPermissions.isNotEmpty() },
+                mediumRisk = results.count {
+                    it.highRiskPermissions.isEmpty() && it.mediumRiskPermissions.isNotEmpty()
+                },
+                lowRisk = results.count {
+                    it.highRiskPermissions.isEmpty() && it.mediumRiskPermissions.isEmpty()
+                },
+                chinese = results.count { it.chineseOrigin }
+            )
+            _state.value = PermissionScanState(
+                isScanning = false,
+                results = results,
+                summary = summary
+            )
         }
     }
 }
