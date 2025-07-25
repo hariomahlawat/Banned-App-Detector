@@ -85,11 +85,38 @@ fun PermissionRiskScreen(
                 val mediumRisk = state.results.filter { !it.chineseOrigin && it.highRiskPermissions.isEmpty() && it.mediumRiskPermissions.isNotEmpty() }
                 val lowRisk = state.results.filter { !it.chineseOrigin && it.highRiskPermissions.isEmpty() && it.mediumRiskPermissions.isEmpty() }
 
+                val sideloaded = state.results.filter { it.sideloaded }
+                val modded = state.results.filter { it.modApp }
+                val background = state.results.filter { it.backgroundPermissions.isNotEmpty() }
+
+                val permissionMap = mutableMapOf<String, MutableList<String>>()
+                state.results.forEach { report ->
+                    report.highRiskPermissions.forEach { perm ->
+                        permissionMap.getOrPut(perm) { mutableListOf() } += report.app.appName
+                    }
+                }
+
                 LazyColumn(Modifier.fillMaxSize().padding(padding)) {
                     item { Spacer(Modifier.height(24.dp)) }
                     state.summary?.let { summary ->
                         item {
                             SummaryCard(summary)
+                            Spacer(Modifier.height(8.dp))
+                            if (state.developerOptionsEnabled) {
+                                Text(
+                                    "\u26A0 Developer options enabled - please disable",
+                                    color = WarningYellow,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.padding(horizontal = 16.dp)
+                                )
+                            } else {
+                                Text(
+                                    "\u2705 Developer options are disabled",
+                                    color = SuccessGreen,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.padding(horizontal = 16.dp)
+                                )
+                            }
                             Spacer(Modifier.height(16.dp))
                         }
                     }
@@ -117,6 +144,90 @@ fun PermissionRiskScreen(
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.padding(16.dp)
                             )
+                        }
+                    }
+
+                    if (sideloaded.isNotEmpty()) {
+                        stickyHeader {
+                            Text(
+                                text = "DIRECT APK INSTALLS",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .padding(horizontal = 20.dp, vertical = 8.dp)
+                            )
+                        }
+                        items(sideloaded) { RiskRow(it) }
+                    } else {
+                        item {
+                            Text(
+                                "\u2705  No sideloaded apps detected",
+                                color = SuccessGreen,
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
+
+                    if (modded.isNotEmpty()) {
+                        stickyHeader {
+                            Text(
+                                text = "POSSIBLE MOD APPS",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .padding(horizontal = 20.dp, vertical = 8.dp)
+                            )
+                        }
+                        items(modded) { RiskRow(it) }
+                    }
+
+                    if (background.isNotEmpty()) {
+                        stickyHeader {
+                            Text(
+                                text = "APPS LISTENING IN BACKGROUND",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .padding(horizontal = 20.dp, vertical = 8.dp)
+                            )
+                        }
+                        items(background) { RiskRow(it) }
+                    }
+
+                    if (permissionMap.isNotEmpty()) {
+                        stickyHeader {
+                            Text(
+                                text = "HIGH RISK PERMISSIONS",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .padding(horizontal = 20.dp, vertical = 8.dp)
+                            )
+                        }
+                        permissionMap.forEach { (perm, apps) ->
+                            item {
+                                Text(
+                                    text = perm,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                                )
+                            }
+                            items(apps) { name ->
+                                Text(
+                                    text = "- $name",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(horizontal = 32.dp)
+                                )
+                            }
                         }
                     }
 
