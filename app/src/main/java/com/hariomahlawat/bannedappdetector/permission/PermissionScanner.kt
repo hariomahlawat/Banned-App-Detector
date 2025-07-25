@@ -24,7 +24,7 @@ class PermissionScanner(private val context: Context) {
         return packages.map { pkg ->
             val perms = pkg.requestedPermissions?.toList() ?: emptyList()
             val app = AppPermissions(
-                appName = pkg.applicationInfo.loadLabel(pm).toString(),
+                appName = pkg.applicationInfo?.loadLabel(pm).toString(),
                 packageName = pkg.packageName,
                 permissions = perms
             )
