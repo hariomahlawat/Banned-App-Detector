@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.*
@@ -38,9 +39,6 @@ import com.hariomahlawat.bannedappdetector.util.setSystemBars
 import java.text.DateFormat
 import java.util.Date
 
-/**
- * Primary scan button with built‑in progress indicator.
- */
 @Composable
 fun ScanButton(
     isAnimating: Boolean,
@@ -131,11 +129,8 @@ fun HomeScreen(
                     actions = {
                         IconButton(onClick = onToggleTheme) {
                             val icon = if (dark) Icons.Default.LightMode else Icons.Default.DarkMode
-                            Icon(
-                                icon,
-                                contentDescription = "Toggle theme",
-                                tint = MaterialTheme.colorScheme.onBackground
-                            )
+                            Icon(icon, contentDescription = "Toggle theme",
+                                tint = MaterialTheme.colorScheme.onBackground)
                         }
                     }
                 )
@@ -171,7 +166,6 @@ private fun HomeContent(
     dark: Boolean,
     modifier: Modifier = Modifier
 ) {
-    // State & animation for "Scan Now"
     var scanAnimating by remember { mutableStateOf(false) }
     val scanProgress = remember { Animatable(0f) }
     LaunchedEffect(scanAnimating) {
@@ -185,7 +179,6 @@ private fun HomeContent(
         }
     }
 
-    // State & animation for "AI Scan"
     var aiScanning by remember { mutableStateOf(false) }
     val aiProgress = remember { Animatable(0f) }
     LaunchedEffect(aiScanning) {
@@ -207,42 +200,31 @@ private fun HomeContent(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Smaller logo
-            Image(
-                painter = painterResource(R.drawable.archer_logo2),
-                contentDescription = "App logo – archer",
-                modifier = Modifier.size(120.dp)
-            )
+            // Two‑column header: logo + vertical chips
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.archer_logo2),
+                    contentDescription = "App logo – archer",
+                    modifier = Modifier.size(120.dp)
+                )
+                Spacer(Modifier.width(16.dp))
+                TrustChipsColumn(dark)
+            }
+
             Spacer(Modifier.height(12.dp))
 
-            Text(
-                "Quick Banned App Scan",
-                style = MaterialTheme.typography.headlineMedium,
-                color = BrandGold,
-                textAlign = TextAlign.Center
-            )
-            Spacer(Modifier.height(8.dp))
-
-            ElevatedAssistChip(
-                onClick = onViewBannedApps,
-                label = { Text("Browse Monitored Apps", color = MaterialTheme.colorScheme.onSurface) },
-                leadingIcon = {
-                    Icon(Icons.Default.ArrowForward, null, tint = MaterialTheme.colorScheme.onSurface)
-                }
-            )
-            Spacer(Modifier.height(12.dp))
-
-            TrustChipsRowEnhanced(dark)
-            Spacer(Modifier.height(12.dp))
-
+            // "Include Unwanted" toggle remains here
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Switch(
                     checked = state.includeUnwanted,
                     onCheckedChange = onIncludeUnwantedChange,
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = MaterialTheme.colorScheme.primary,
+                        checkedThumbColor   = MaterialTheme.colorScheme.primary,
                         uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                        checkedTrackColor   = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
                         uncheckedTrackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
                     )
                 )
@@ -253,9 +235,10 @@ private fun HomeContent(
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
+
             Spacer(Modifier.height(12.dp))
 
-            // Scan Now button + progress
+            // Primary Scan
             ScanButton(
                 isAnimating = scanAnimating,
                 progress = scanProgress.value,
@@ -266,18 +249,18 @@ private fun HomeContent(
                 Spacer(Modifier.height(8.dp))
                 LinearProgressIndicator(
                     progress = scanProgress.value,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(4.dp),
+                    modifier = Modifier.fillMaxWidth().height(4.dp),
                     color = SuccessGreen,
                     trackColor = SuccessGreen.copy(alpha = 0.3f)
                 )
             }
+
             Spacer(Modifier.height(16.dp))
 
             DividerWithText("Advanced Privacy Scan")
             Spacer(Modifier.height(12.dp))
 
+            // AI Scan
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -301,13 +284,10 @@ private fun HomeContent(
                         textAlign = TextAlign.Center
                     )
                     Spacer(Modifier.height(12.dp))
-
                     Button(
                         onClick = { aiScanning = true },
                         enabled = !aiScanning,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
                         contentPadding = PaddingValues(0.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
@@ -325,18 +305,17 @@ private fun HomeContent(
                         Spacer(Modifier.height(8.dp))
                         LinearProgressIndicator(
                             progress = aiProgress.value,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(4.dp),
+                            modifier = Modifier.fillMaxWidth().height(4.dp),
                             color = SuccessGreen,
                             trackColor = SuccessGreen.copy(alpha = 0.3f)
                         )
                     }
                 }
             }
+
             Spacer(Modifier.height(16.dp))
 
-            // Show summary & footer only after a scan
+            // Summary & footer appear only after a scan
             state.summary?.let {
                 SummaryCard(it, state.lastScanAt, onViewResults)
                 Spacer(Modifier.height(16.dp))
@@ -346,48 +325,45 @@ private fun HomeContent(
     }
 }
 
-/** Helper composables below **/
-
+/** Vertical chip column next to logo **/
 @Composable
-fun DividerWithText(text: String) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Divider(Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(
-            text,
-            Modifier.padding(horizontal = 12.dp),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Divider(Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
-}
-
-@Composable
-fun TrustChipsRowEnhanced(dark: Boolean) {
+fun TrustChipsColumn(dark: Boolean) {
     val chipBg = if (dark)
         MaterialTheme.colorScheme.surface.copy(alpha = 0.24f)
     else
         MaterialTheme.colorScheme.surfaceVariant
 
-    Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+    Column {
         listOf(
+            "AI‑Powered"       to Icons.Filled.Memory,
             "Play Protect OK" to Icons.Filled.VerifiedUser,
             "No permissions"   to Icons.Filled.Lock,
-            "AI-Powered"       to Icons.Filled.Shield
+            "Offline Scan"       to Icons.Filled.Shield
         ).forEach { (label, icon) ->
             Row(
                 Modifier
-                    .padding(horizontal = 4.dp)
                     .clip(RoundedCornerShape(50))
                     .background(chipBg)
-                    .padding(horizontal = 12.dp, vertical = 4.dp),
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(icon, null, tint = SuccessGreen, modifier = Modifier.size(16.dp))
-                Spacer(Modifier.width(4.dp))
+                Spacer(Modifier.width(8.dp))
                 Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
             }
+            Spacer(Modifier.height(8.dp))
         }
+    }
+}
+
+@Composable
+fun DividerWithText(text: String) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Divider(Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(text, Modifier.padding(horizontal = 12.dp),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface)
+        Divider(Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -398,7 +374,7 @@ fun SummaryCard(
     onViewResults: () -> Unit
 ) {
     Surface(
-        modifier = Modifier
+        Modifier
             .glassCard(MaterialTheme.colorScheme.surface.copy(alpha = 0.45f))
             .fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.45f)
@@ -423,8 +399,7 @@ fun SummaryCard(
                 )
             }
             Spacer(Modifier.height(12.dp))
-            Button(
-                onClick = onViewResults,
+            Button(onClick = onViewResults,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text("View Details", color = MaterialTheme.colorScheme.onPrimary)
