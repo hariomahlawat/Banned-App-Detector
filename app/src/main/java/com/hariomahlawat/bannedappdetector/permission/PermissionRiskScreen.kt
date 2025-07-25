@@ -61,6 +61,11 @@ fun PermissionRiskScreen(
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
+            } else if (state.summary == null) {
+                // Brief moment before state switches to scanning can show null summary
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             } else {
                 // Prepare your data slices
                 val high   = state.results.filter { it.highRiskPermissions.isNotEmpty() }
