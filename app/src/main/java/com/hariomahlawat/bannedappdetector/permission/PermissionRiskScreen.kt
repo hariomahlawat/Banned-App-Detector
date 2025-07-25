@@ -229,17 +229,6 @@ fun PermissionRiskScreen(
                         }
                     }
 
-                    item {
-                        RiskCategoryTile(
-                            title = "Low Risk Apps",
-                            count = lowRisk.size,
-                            explanation = "Apps with minimal or no dangerous permissions.",
-                            shadowColor = if (lowRisk.isEmpty()) SuccessGreen else ErrorRed,
-                        ) {
-                            lowRisk.forEach { RiskRow(it) }
-                        }
-                    }
-
                     item { Spacer(Modifier.height(48.dp)) }
                 }
             }
@@ -286,7 +275,6 @@ private fun SummaryCard(summary: PermissionScanSummary) {
             ) {
                 MetricTile(summary.highRisk.toString(), "HIGH", Icons.Default.Warning, ErrorRed)
                 MetricTile(summary.mediumRisk.toString(), "MED", Icons.Default.Warning, WarningYellow)
-                MetricTile(summary.lowRisk.toString(), "LOW", Icons.Default.Inbox, SuccessGreen)
                 MetricTile(summary.total.toString(), "SCANNED", Icons.Default.Inbox, BrandGold)
             }
 
