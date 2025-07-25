@@ -64,6 +64,9 @@ published by known Chinese-origin developers receive a small additional
 risk bonus, while well known trusted packages are penalised to reduce
 false positives.
 
+From the home screen you can launch this scan via the **AI Scan** button,
+which lists installed apps with their permission risk score.
+
 The asset files are stored in `src/main/assets`:
 
 - `permissions.json` – mapping of permission to risk level

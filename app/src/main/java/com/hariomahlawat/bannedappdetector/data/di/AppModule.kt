@@ -17,6 +17,7 @@ import com.hariomahlawat.bannedappdetector.util.DispatcherProvider
 import com.hariomahlawat.bannedappdetector.util.StandardDispatcherProvider
 import com.hariomahlawat.bannedappdetector.update.AppUpdateRepository
 import com.hariomahlawat.bannedappdetector.update.PlayAppUpdateRepository
+import com.hariomahlawat.bannedappdetector.permission.PermissionScanner
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import dagger.Module
@@ -77,4 +78,8 @@ object AppModule {
 
     @Provides
     fun summaryUseCase() = ComputeSummaryStatsUseCase()
+
+    @Provides
+    fun permissionScanner(@ApplicationContext context: Context) =
+        PermissionScanner(context)
 }
