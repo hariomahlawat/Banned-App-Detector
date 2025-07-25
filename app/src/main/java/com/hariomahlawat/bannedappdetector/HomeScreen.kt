@@ -4,20 +4,56 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.VerifiedUser
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.ElevatedAssistChip
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,13 +64,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hariomahlawat.bannedappdetector.components.AppInfoFooter
-import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientEnd
+import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
 import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
 import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
-import com.hariomahlawat.bannedappdetector.UpdateDialog
-import com.hariomahlawat.bannedappdetector.UpdateViewModel
 import com.hariomahlawat.bannedappdetector.util.setSystemBars
 import java.text.DateFormat
 import java.util.Date
@@ -66,10 +100,11 @@ fun ScanButton(
         ) {
             if (isAnimating) {
                 LinearProgressIndicator(
-                    progress = progress,
+                    progress = { progress },
                     modifier = Modifier.fillMaxSize(),
                     color = SuccessGreen,
-                    trackColor = SuccessGreen.copy(alpha = 0.3f)
+                    trackColor = SuccessGreen.copy(alpha = 0.3f),
+                    strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
                 )
             }
             Text(
@@ -221,7 +256,7 @@ private fun HomeContent(
                 onClick = onViewBannedApps,
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = {
-                    Icon(Icons.Default.ArrowForward, contentDescription = null)
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
                 },
                 label = { Text("Browse Monitored Apps") }
             )
@@ -259,10 +294,13 @@ private fun HomeContent(
             if (scanProgress.value > 0f) {
                 Spacer(Modifier.height(8.dp))
                 LinearProgressIndicator(
-                    progress = scanProgress.value,
-                    modifier = Modifier.fillMaxWidth().height(4.dp),
+                    progress = { scanProgress.value },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp),
                     color = SuccessGreen,
-                    trackColor = SuccessGreen.copy(alpha = 0.3f)
+                    trackColor = SuccessGreen.copy(alpha = 0.3f),
+                    strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
                 )
             }
 
@@ -298,14 +336,20 @@ private fun HomeContent(
                     Button(
                         onClick = { aiScanning = true },
                         enabled = !aiScanning,
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
                         contentPadding = PaddingValues(0.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                         )
                     ) {
-                        Icon(Icons.Default.ArrowForward, null, tint = MaterialTheme.colorScheme.onPrimary)
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowForward,
+                            null,
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
                         Spacer(Modifier.width(8.dp))
                         Text(
                             if (aiScanning) "Scanning…" else "Start AI Scan",
@@ -315,10 +359,13 @@ private fun HomeContent(
                     if (aiProgress.value > 0f) {
                         Spacer(Modifier.height(8.dp))
                         LinearProgressIndicator(
-                            progress = aiProgress.value,
-                            modifier = Modifier.fillMaxWidth().height(4.dp),
+                            progress = { aiProgress.value },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(4.dp),
                             color = SuccessGreen,
-                            trackColor = SuccessGreen.copy(alpha = 0.3f)
+                            trackColor = SuccessGreen.copy(alpha = 0.3f),
+                            strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
                         )
                     }
                 }
@@ -370,11 +417,19 @@ fun TrustChipsColumn(dark: Boolean) {
 @Composable
 fun DividerWithText(text: String) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Divider(Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        HorizontalDivider(
+            Modifier.weight(1f),
+            DividerDefaults.Thickness,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         Text(text, Modifier.padding(horizontal = 12.dp),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurface)
-        Divider(Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        HorizontalDivider(
+            Modifier.weight(1f),
+            DividerDefaults.Thickness,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 

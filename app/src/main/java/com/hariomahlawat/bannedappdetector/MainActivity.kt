@@ -4,19 +4,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.core.view.WindowCompat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.core.view.WindowCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.hilt.navigation.compose.hiltViewModel
-import dagger.hilt.android.AndroidEntryPoint
-import com.hariomahlawat.bannedappdetector.ui.theme.BannedAppDetectorTheme
-import com.hariomahlawat.bannedappdetector.ThemeViewModel
-import com.hariomahlawat.bannedappdetector.ThemeSetting
 import com.hariomahlawat.bannedappdetector.permission.PermissionRiskScreen
+import com.hariomahlawat.bannedappdetector.ui.theme.BannedAppDetectorTheme
+import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

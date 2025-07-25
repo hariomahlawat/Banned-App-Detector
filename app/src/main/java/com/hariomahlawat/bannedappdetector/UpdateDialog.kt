@@ -1,12 +1,12 @@
 package com.hariomahlawat.bannedappdetector
 
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.net.toUri
 
 @Composable
 fun UpdateDialog(onDismiss: () -> Unit) {
@@ -15,7 +15,8 @@ fun UpdateDialog(onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = {
-                val uri = Uri.parse("https://play.google.com/store/apps/details?id=" + BuildConfig.APPLICATION_ID)
+                val uri =
+                    ("https://play.google.com/store/apps/details?id=" + BuildConfig.APPLICATION_ID).toUri()
                 context.startActivity(Intent(Intent.ACTION_VIEW, uri))
                 onDismiss()
             }) {

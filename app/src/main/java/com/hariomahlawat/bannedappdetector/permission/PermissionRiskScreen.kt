@@ -22,8 +22,9 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -119,7 +120,7 @@ fun PermissionRiskScreen(
                 val chineseApps = state.results.filter { it.chineseOrigin }
                 val highRisk = state.results.filter { !it.chineseOrigin && it.highRiskPermissions.isNotEmpty() }
                 val mediumRisk = state.results.filter { !it.chineseOrigin && it.highRiskPermissions.isEmpty() && it.mediumRiskPermissions.isNotEmpty() }
-                val lowRisk = state.results.filter { !it.chineseOrigin && it.highRiskPermissions.isEmpty() && it.mediumRiskPermissions.isEmpty() }
+                state.results.filter { !it.chineseOrigin && it.highRiskPermissions.isEmpty() && it.mediumRiskPermissions.isEmpty() }
 
                 val sideloaded = state.results.filter { it.sideloaded }
                 val modded = state.results.filter { it.modApp }
@@ -257,7 +258,11 @@ private fun RiskRow(report: AppRiskReport) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
     )
-    Divider(modifier = Modifier.padding(horizontal = 16.dp))
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        thickness = DividerDefaults.Thickness,
+        color = DividerDefaults.color
+    )
 }
 
 @Composable
