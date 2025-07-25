@@ -1,0 +1,13 @@
+{
+  "SEND_SMS": {"risk": "HIGH", "type": "ACTIVE"},
+  "RECEIVE_SMS": {"risk": "HIGH", "type": "PASSIVE"},
+  "RECORD_AUDIO": {"risk": "HIGH", "type": "PASSIVE"},
+  "CAMERA": {"risk": "MEDIUM", "type": "ACTIVE"},
+  "ACCESS_FINE_LOCATION": {"risk": "MEDIUM", "type": "PASSIVE"},
+  "READ_CONTACTS": {"risk": "MEDIUM", "type": "PASSIVE"},
+  "READ_SMS": {"risk": "HIGH", "type": "PASSIVE"},
+  "READ_EXTERNAL_STORAGE": {"risk": "LOW", "type": "PASSIVE"},
+  "WRITE_EXTERNAL_STORAGE": {"risk": "LOW", "type": "PASSIVE"},
+  "SYSTEM_ALERT_WINDOW": {"risk": "MEDIUM", "type": "PASSIVE"},
+  "BIND_ACCESSIBILITY_SERVICE": {"risk": "HIGH", "type": "PASSIVE"}
+}
