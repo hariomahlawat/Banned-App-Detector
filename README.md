@@ -52,3 +52,21 @@ You can also open the project in Android Studio and click **Run** to deploy.
 ## AI-based Risk Scanning
 
 See [docs/AI-App-Scanning-Plan.md](docs/AI-App-Scanning-Plan.md) for a proposal on integrating an AI model to assess the risk of installed apps alongside the static banned list. The current implementation ships with a lightweight local sentiment analyser that estimates the ratio of negative reviews and factors it into the risk score.
+
+## Permission & Risk Analysis Module
+
+The app ships with an optional permission scanner located under
+`com.hariomahlawat.bannedappdetector.permission`. It loads sensitive
+permissions from JSON assets and categorises them as HIGH, MEDIUM or LOW
+risk. Installed applications are scanned offline and each receives a
+score based on the number of sensitive permissions requested. Packages
+published by known Chinese-origin developers receive a small additional
+risk bonus, while well known trusted packages are penalised to reduce
+false positives.
+
+The asset files are stored in `src/main/assets`:
+
+- `permissions.json` – mapping of permission to risk level
+- `trusted_apps.json` – packages considered safe
+- `chinese_publishers.json` – list of package name prefixes used to detect
+  Chinese-origin apps
