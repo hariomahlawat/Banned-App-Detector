@@ -4,6 +4,7 @@ package com.hariomahlawat.bannedappdetector.store
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
+import com.hariomahlawat.bannedappdetector.AppCategory
 import com.hariomahlawat.bannedappdetector.MonitoredAppMeta
 import com.hariomahlawat.bannedappdetector.MonitoredStatus
 import com.hariomahlawat.bannedappdetector.ScanResult
@@ -50,6 +51,7 @@ class ScanResultsRepositoryImpl @Inject constructor(
             val o = JSONObject().apply {
                 put("pkg", r.meta.packageName)
                 put("name", r.meta.displayName)
+                put("category", r.meta.category.name)
                 put("status", r.status.name)
                 put("verName", r.versionName)
                 put("verCode", r.versionCode)
@@ -69,7 +71,8 @@ class ScanResultsRepositoryImpl @Inject constructor(
         val out = mutableListOf<ScanResult>()
         for (i in 0 until arr.length()) {
             val o = arr.getJSONObject(i)
-            val meta = MonitoredAppMeta(o.getString("pkg"), o.getString("name"))
+            val category = o.optString("category", null)?.let { AppCategory.valueOf(it) } ?: AppCategory.BANNED
+            val meta = MonitoredAppMeta(o.getString("pkg"), o.getString("name"), category)
             val status = MonitoredStatus.valueOf(o.getString("status"))
             out += ScanResult(
                 meta = meta,
