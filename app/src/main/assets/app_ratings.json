@@ -1,0 +1,14 @@
+{
+  "com.facebook.katana": {
+    "rating": 2.6,
+    "reviews": ["Too many ads", "Privacy concerns"]
+  },
+  "com.instagram.android": {
+    "rating": 3.5,
+    "reviews": ["Fun but addictive", "Needs improvement"]
+  },
+  "com.truecaller": {
+    "rating": 3.9,
+    "reviews": ["Great caller ID", "Spam issues"]
+  }
+}
