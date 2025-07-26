@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -46,11 +47,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
-import kotlin.math.roundToInt
+import androidx.core.graphics.drawable.toBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hariomahlawat.bannedappdetector.IssueSummary
 import com.hariomahlawat.bannedappdetector.VerdictCard
@@ -63,7 +64,7 @@ import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
 import com.hariomahlawat.bannedappdetector.util.KeywordExtractor
 import com.hariomahlawat.bannedappdetector.util.setSystemBars
-import androidx.core.graphics.drawable.toBitmap
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -329,6 +330,7 @@ private fun RiskRow(report: AppRiskReport) {
 }
 
 
+@SuppressLint("DefaultLocale")
 @Composable
 private fun RatingsOverviewCard(
     avgRating: Float,
@@ -375,6 +377,7 @@ private fun RatingsOverviewCard(
     }
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 private fun LowRatingAppsCard(apps: List<AppRiskReport>, threshold: Float) {
     if (apps.isEmpty()) return
@@ -388,7 +391,9 @@ private fun LowRatingAppsCard(apps: List<AppRiskReport>, threshold: Float) {
             Text("Low-Rating Apps", style = MaterialTheme.typography.titleMedium, color = BrandGold)
             Spacer(Modifier.height(8.dp))
             apps.forEach { rep ->
-                Row(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                Row(Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)) {
                     AppIcon(rep.app.packageName)
                     Spacer(Modifier.width(8.dp))
                     Column(Modifier.weight(1f)) {
@@ -442,7 +447,9 @@ private fun ReviewSentimentCard(
             } else {
                 Spacer(Modifier.height(4.dp))
                 offenders.forEach { rep ->
-                    Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                    Column(Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)) {
                         val caution = MaterialTheme.colorScheme.error
                         val keywords = KeywordExtractor().topKeywords(rep.reviews)
                         Text(rep.app.appName, style = MaterialTheme.typography.bodyMedium)
