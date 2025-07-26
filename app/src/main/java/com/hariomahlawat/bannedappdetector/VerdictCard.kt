@@ -12,8 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Error
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -42,7 +40,6 @@ data class IssueSummary(
 fun VerdictCard(
     totalApps: Int,          // <-- NEW: pass the scan total
     issues: IssueSummary,
-    onViewDetails: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val hasIssues = issues.total > 0
@@ -52,15 +49,11 @@ fun VerdictCard(
     val iconTint = if (hasIssues) ErrorRed else SuccessGreen
     val title = if (hasIssues) "Attention needed" else "All clear!"
 
-    val subtitle = if (hasIssues) {
-        buildString {
-            append("${issues.total} issue")
-            if (issues.total > 1) append('s')
-            append(" found in $totalApps app")
-            if (totalApps != 1) append('s')
-        }
+    val scanInfo = "Total $totalApps app${if (totalApps != 1) "s" else ""} scanned."
+    val issueInfo = if (hasIssues) {
+        "${issues.total} issue${if (issues.total > 1) "s" else ""} found"
     } else {
-        "Scanned $totalApps app${if (totalApps != 1) "s" else ""} – no issues."
+        "No issues found."
     }
 
     /* card container */
@@ -85,26 +78,27 @@ fun VerdictCard(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        subtitle,
+                        scanInfo,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        issueInfo,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
-            /* issue chips – only when problems exist */
+            /* issue list – only when problems exist */
             if (hasIssues) {
                 Spacer(Modifier.height(10.dp))
-                IssueChip("\uD83C\uDDE8\uD83C\uDDF3", issues.chinese)   // 🇨🇳
-                IssueChip("⬇", issues.sideloaded)         // sideload
-                IssueChip("\uD83D\uDEE0", issues.modded)             // wrench
-                IssueChip("\uD83D\uDD12", issues.highRisk)           // lock
+                IssueLine("Chinese Origin Apps", issues.chinese)
+                IssueLine("Direct APK Installs", issues.sideloaded)
+                IssueLine("Possible Mod Apps", issues.modded)
+                IssueLine("High Risk Apps", issues.highRisk)
+                Spacer(Modifier.height(12.dp))
             }
-
-            Spacer(Modifier.height(12.dp))
-            Button(
-                onClick = onViewDetails,
-                colors = ButtonDefaults.filledTonalButtonColors(containerColor = iconTint)
-            ) { Text("View details") }
         }
     }
 }
@@ -124,4 +118,14 @@ private fun IssueChip(symbol: String, count: Int) {
             color = BrandGold
         )
     }
+}
+
+@Composable
+private fun IssueLine(label: String, count: Int) {
+    if (count == 0) return
+    Text(
+        String.format("%02d %s", count, label),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
 }

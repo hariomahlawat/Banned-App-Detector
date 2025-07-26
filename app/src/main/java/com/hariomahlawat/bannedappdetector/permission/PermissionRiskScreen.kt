@@ -143,8 +143,7 @@ fun PermissionRiskScreen(
                         item {
                             VerdictCard(
                                 totalApps = summary.total,
-                                issues = issueSummary,
-                                onViewDetails = {}
+                                issues = issueSummary
                             )
                             Spacer(Modifier.height(8.dp))
                             DeveloperOptionsCard(state.developerOptionsEnabled)
