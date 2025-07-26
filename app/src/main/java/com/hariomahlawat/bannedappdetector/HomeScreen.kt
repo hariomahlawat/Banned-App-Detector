@@ -62,7 +62,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import kotlin.math.max
 import com.hariomahlawat.bannedappdetector.components.AppInfoFooter
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientEnd
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
@@ -72,6 +71,7 @@ import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
 import com.hariomahlawat.bannedappdetector.util.setSystemBars
 import java.text.DateFormat
 import java.util.Date
+import kotlin.math.max
 
 /*──────────────────────── PUBLIC ENTRY ────────────────────────*/
 @OptIn(ExperimentalMaterial3Api::class)
@@ -111,7 +111,7 @@ fun HomeScreen(
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
-                    title = { Text("Banned App Detector", color = BrandGold) },
+                    title = { Text("Eklavya-AI Security Scan", color = BrandGold) },
                     actions = {
                         IconButton(onClick = onToggleTheme) {
                             Icon(
@@ -218,7 +218,7 @@ private fun HomeContent(
             Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(Icons.Default.Block, null, tint = BrandGold, modifier = Modifier.size(32.dp))
                 Spacer(Modifier.height(8.dp))
-                Text("Banned / Unwanted Scan", style = MaterialTheme.typography.titleMedium)
+                Text("Banned / Unwanted Apps Scan", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(4.dp))
                 Text(
                     "Find and disable banned or unwanted apps.",
@@ -285,7 +285,7 @@ private fun HomeContent(
                     modifier = Modifier.size(32.dp)
                 )
                 Spacer(Modifier.height(8.dp))
-                Text("AI‑Based Privacy Scan", style = MaterialTheme.typography.titleMedium)
+                Text("AI‑Based Security Scan", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(4.dp))
                 Text(
                     "Deep‑scan installed apps for sensitive permissions and risky behaviour.",
@@ -328,30 +328,47 @@ private fun HomeContent(
 /*────────────────── HELPERS ──────────────────*/
 @Composable
 fun TrustChipsColumn(dark: Boolean) {
-    val bg = if (dark) MaterialTheme.colorScheme.surface.copy(alpha = .24f)
-    else MaterialTheme.colorScheme.surfaceVariant
+    val chipBg = if (dark)
+        MaterialTheme.colorScheme.surface.copy(alpha = .24f)
+    else
+        MaterialTheme.colorScheme.surfaceVariant
+
+    // Pick a foreground that always contrasts with chipBg
+    val fg = if (dark) MaterialTheme.colorScheme.onSurface     // bright on dark chip
+    else MaterialTheme.colorScheme.onSurfaceVariant   // dark on light chip
+
     Column {
         listOf(
             "AI‑Powered" to Icons.Filled.Memory,
-            "Play Protect OK" to Icons.Filled.VerifiedUser,
+            "Play Protect OK" to Icons.Filled.VerifiedUser,
             "No permissions" to Icons.Filled.Lock,
             "Offline Scan" to Icons.Filled.Shield
         ).forEach { (label, icon) ->
             Row(
                 Modifier
                     .clip(RoundedCornerShape(50))
-                    .background(bg)
+                    .background(chipBg)
                     .padding(horizontal = 12.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(icon, null, tint = SuccessGreen, modifier = Modifier.size(16.dp))
+                Icon(
+                    icon,
+                    contentDescription = null,
+                    tint = SuccessGreen,
+                    modifier = Modifier.size(16.dp)
+                )
                 Spacer(Modifier.width(8.dp))
-                Text(label, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    label,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = fg                 // 👈 fixed
+                )
             }
             Spacer(Modifier.height(8.dp))
         }
     }
 }
+
 
 @Composable
 fun HomeSummaryCard(

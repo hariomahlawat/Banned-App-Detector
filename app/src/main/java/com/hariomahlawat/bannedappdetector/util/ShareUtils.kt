@@ -3,14 +3,13 @@ package com.hariomahlawat.bannedappdetector.util
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.net.Uri
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.Typeface
-import android.graphics.Color
+import android.net.Uri
 import androidx.core.content.FileProvider
-import androidx.core.view.drawToBitmap
 import java.io.File
 import java.io.FileOutputStream
 
@@ -33,7 +32,10 @@ fun Bitmap.withLabel(context: Context, label: String): Bitmap {
     val bounds = Rect()
     paint.getTextBounds(label, 0, label.length, bounds)
     val x = padding
-    val y = copy.height - padding
+    val extraTopOffset = (133 * dm.density).toInt()
+    val y = padding + bounds.height() + extraTopOffset
+
+
 
     canvas.drawRect(
         (x - padding).toFloat(),

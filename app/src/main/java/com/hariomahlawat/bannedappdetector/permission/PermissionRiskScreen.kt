@@ -99,7 +99,7 @@ fun PermissionRiskScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            "AI-Based Privacy Scan",
+                            "AI-Based Security Scan",
                             style = MaterialTheme.typography.headlineSmall
                         )
                     },
