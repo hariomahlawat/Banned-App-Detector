@@ -2,6 +2,7 @@ package com.hariomahlawat.bannedappdetector.permission
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -17,6 +18,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,9 +45,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hariomahlawat.bannedappdetector.IssueSummary
 import com.hariomahlawat.bannedappdetector.VerdictCard
@@ -57,6 +63,7 @@ import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
 import com.hariomahlawat.bannedappdetector.util.KeywordExtractor
 import com.hariomahlawat.bannedappdetector.util.setSystemBars
+import androidx.core.graphics.drawable.toBitmap
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -162,13 +169,20 @@ fun PermissionRiskScreen(
                             .sortedByDescending { it.negativeReviewRatio }
                         val offline = state.results.any { it.fromCache }
                         item {
-                            RatingSummaryCard(
+                            RatingsOverviewCard(
                                 avgRating = avg,
                                 totalApps = state.results.size,
                                 lowRated = lowRated,
-                                reviewedCount = reviewedCount,
                                 offenders = offenders,
                                 offline = offline
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            LowRatingAppsCard(lowRated, lowThreshold)
+                            Spacer(Modifier.height(8.dp))
+                            ReviewSentimentCard(
+                                reviewedCount = reviewedCount,
+                                offenders = offenders,
+                                negativeThreshold = negativeThreshold
                             )
                             Spacer(Modifier.height(16.dp))
                         }
@@ -316,11 +330,10 @@ private fun RiskRow(report: AppRiskReport) {
 
 
 @Composable
-private fun RatingSummaryCard(
+private fun RatingsOverviewCard(
     avgRating: Float,
     totalApps: Int,
     lowRated: List<AppRiskReport>,
-    reviewedCount: Int,
     offenders: List<AppRiskReport>,
     offline: Boolean
 ) {
@@ -347,32 +360,75 @@ private fun RatingSummaryCard(
             }
 
             Spacer(Modifier.height(8.dp))
-            Text("Low-rating apps", style = MaterialTheme.typography.titleMedium, color = BrandGold)
-            if (lowRated.isEmpty()) {
-                Text("None", style = MaterialTheme.typography.bodySmall)
-            } else {
-                lowRated.forEach { rep ->
-                    val ratingText = if (rep.reviewCount < 10) {
-                        "Not enough data"
-                    } else {
-                        String.format("%.1f ★", rep.rating)
+            val lowNames = lowRated.joinToString { it.app.appName }
+            Text(
+                "${lowRated.size} apps below threshold${if (lowNames.isNotBlank()) ": $lowNames" else ""}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                "${offenders.size} apps with high negative-review ratio",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+@Composable
+private fun LowRatingAppsCard(apps: List<AppRiskReport>, threshold: Float) {
+    if (apps.isEmpty()) return
+    Surface(
+        modifier = Modifier
+            .glassCard(Color.Black.copy(alpha = .45f))
+            .fillMaxWidth(),
+        tonalElevation = 1.dp
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text("Low-Rating Apps", style = MaterialTheme.typography.titleMedium, color = BrandGold)
+            Spacer(Modifier.height(8.dp))
+            apps.forEach { rep ->
+                Row(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                    AppIcon(rep.app.packageName)
+                    Spacer(Modifier.width(8.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(rep.app.appName, style = MaterialTheme.typography.bodyMedium)
+                        if (rep.reviewCount < 10) {
+                            Text("Not enough data", style = MaterialTheme.typography.bodySmall)
+                        } else {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(String.format("%.1f", rep.rating), style = MaterialTheme.typography.bodySmall)
+                                Spacer(Modifier.width(4.dp))
+                                StarsRow(rep.rating ?: 0f, highlight = rep.rating != null && rep.rating < threshold)
+                            }
+                        }
+                        rep.reviews.firstOrNull()?.let { snippet ->
+                            Text(
+                                "\"$snippet\"",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
-                    Row(Modifier.fillMaxWidth()) {
-                        Text(rep.app.appName, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-                        Text(ratingText, style = MaterialTheme.typography.bodySmall)
-                    }
-                    rep.reviews.firstOrNull()?.let { snippet ->
-                        Text(
-                            "\"$snippet\"",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Spacer(Modifier.height(4.dp))
                 }
             }
+        }
+    }
+}
 
-            Spacer(Modifier.height(8.dp))
+@Composable
+private fun ReviewSentimentCard(
+    reviewedCount: Int,
+    offenders: List<AppRiskReport>,
+    negativeThreshold: Float
+) {
+    Surface(
+        modifier = Modifier
+            .glassCard(Color.Black.copy(alpha = .45f))
+            .fillMaxWidth(),
+        tonalElevation = 1.dp
+    ) {
+        Column(Modifier.padding(16.dp)) {
             Text(
                 "Reviews scanned for $reviewedCount apps",
                 style = MaterialTheme.typography.bodyMedium,
@@ -386,14 +442,53 @@ private fun RatingSummaryCard(
             } else {
                 Spacer(Modifier.height(4.dp))
                 offenders.forEach { rep ->
-                    val keywords = KeywordExtractor().topKeywords(rep.reviews)
-                    Text(
-                        "- ${rep.app.appName} ${(rep.negativeReviewRatio * 100).toInt()}% negative ${if (keywords.isNotEmpty()) keywords.joinToString(prefix = "(", postfix = ")") else ""}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (rep.negativeReviewRatio > 0.4f) ErrorRed else MaterialTheme.colorScheme.onSurface
-                    )
+                    Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                        val caution = MaterialTheme.colorScheme.error
+                        val keywords = KeywordExtractor().topKeywords(rep.reviews)
+                        Text(rep.app.appName, style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            "${(rep.negativeReviewRatio * 100).toInt()}% negative",
+                            color = if (rep.negativeReviewRatio > negativeThreshold) caution else MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        if (keywords.isNotEmpty()) {
+                            Text(keywords.joinToString(), style = MaterialTheme.typography.bodySmall)
+                        }
+                        rep.reviews.firstOrNull()?.let { snippet ->
+                            Text(
+                                "\"$snippet\"",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun AppIcon(packageName: String, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val drawable = remember(packageName) {
+        try { context.packageManager.getApplicationIcon(packageName) } catch (_: Exception) { null }
+    }
+    if (drawable != null) {
+        val bitmap = remember(drawable) { drawable.toBitmap().asImageBitmap() }
+        Image(bitmap = bitmap, contentDescription = null, modifier = modifier.size(24.dp))
+    } else {
+        Icon(imageVector = Icons.Default.Star, contentDescription = null, modifier = modifier.size(24.dp))
+    }
+}
+
+@Composable
+private fun StarsRow(rating: Float, highlight: Boolean) {
+    Row {
+        val color = if (highlight) MaterialTheme.colorScheme.error else BrandGold
+        repeat(5) { i ->
+            val icon = if (i < rating.roundToInt()) Icons.Filled.Star else Icons.Outlined.Star
+            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(14.dp))
         }
     }
 }
