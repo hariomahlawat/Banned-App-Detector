@@ -22,7 +22,7 @@ class PermissionScanner(private val context: Context) {
     private val trustedApps: List<String> by lazy { loadListFromAsset("trusted_apps.json") }
     private val chinesePublishers: List<String> by lazy { loadListFromAsset("chinese_publishers.json") }
 
-    private val metadataFetcher = OnlineMetadataFetcher()
+    private val metadataFetcher = OnlineMetadataFetcher(context)
 
     private val officialInstallers = setOf(
         "com.android.vending",
