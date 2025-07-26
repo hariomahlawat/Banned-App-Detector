@@ -20,8 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Inbox
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -56,11 +53,18 @@ import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientEnd
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
 import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
 import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
-import com.hariomahlawat.bannedappdetector.ui.theme.WarningYellow
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
 import com.hariomahlawat.bannedappdetector.util.setSystemBars
 
 private val ErrorRed = Color(0xFFE53935)
+
+/** Simple container for counts of notable issues found during scanning. */
+data class IssueSummary(
+    val chinese: Int = 0,
+    val sideloaded: Int = 0,
+    val modded: Int = 0,
+    val highRisk: Int = 0
+)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PermissionRiskScreen(
@@ -139,8 +143,14 @@ fun PermissionRiskScreen(
                     .padding(padding)) {
                     item { Spacer(Modifier.height(24.dp)) }
                     state.summary?.let { summary ->
+                        val issueSummary = IssueSummary(
+                            chinese = chineseApps.size,
+                            sideloaded = sideloaded.size,
+                            modded = modded.size,
+                            highRisk = highRisk.size
+                        )
                         item {
-                            SummaryCard(summary)
+                            SummaryCard(summary, issueSummary)
                             Spacer(Modifier.height(8.dp))
                             DeveloperOptionsCard(state.developerOptionsEnabled)
                             Spacer(Modifier.height(16.dp))
@@ -296,7 +306,26 @@ private fun RiskRow(report: AppRiskReport) {
 }
 
 @Composable
-private fun SummaryCard(summary: PermissionScanSummary) {
+private fun SummaryCard(summary: PermissionScanSummary, issues: IssueSummary) {
+    val issueCount = issues.chinese + issues.sideloaded + issues.modded + issues.highRisk
+    val message = if (issueCount == 0) {
+        "\uD83C\uDF89  ${summary.total} apps scanned. No major issues detected."
+    } else {
+        buildString {
+            append("${summary.total} apps scanned. $issueCount issue")
+            if (issueCount > 1) append("s")
+            append(" found: ")
+            val parts = mutableListOf<String>()
+            if (issues.chinese > 0) parts += "${issues.chinese} Chinese app"
+            if (issues.sideloaded > 0) parts += "${issues.sideloaded} sideloaded"
+            if (issues.modded > 0) parts += "${issues.modded} modded"
+            if (issues.highRisk > 0) parts += "${issues.highRisk} high risk"
+            append(parts.joinToString(", "))
+            append('.')
+        }
+    }
+
+    val colour = if (issueCount == 0) SuccessGreen else ErrorRed
     Surface(
         modifier = Modifier
             .glassCard(Color.Black.copy(alpha = .45f))
@@ -304,14 +333,11 @@ private fun SummaryCard(summary: PermissionScanSummary) {
         tonalElevation = 1.dp
     ) {
         Column(Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                MetricTile(summary.highRisk.toString(), "HIGH", Icons.Default.Warning, ErrorRed)
-                MetricTile(summary.mediumRisk.toString(), "MED", Icons.Default.Warning, WarningYellow)
-                MetricTile(summary.total.toString(), "SCANNED", Icons.Default.Inbox, BrandGold)
-            }
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = colour
+            )
         }
     }
 }
@@ -347,22 +373,6 @@ private fun RatingSummaryCard(avgRating: Float, lowCount: Int, offenders: List<A
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun MetricTile(value: String, label: String, icon: ImageVector, tint: Color) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .widthIn(min = 0.dp, max = 80.dp)
-            .padding(horizontal = 4.dp, vertical = 8.dp)
-    ) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp), tint = tint)
-        Spacer(Modifier.height(4.dp))
-        Text(text = value, style = MaterialTheme.typography.bodyLarge, color = tint)
-        Spacer(Modifier.height(2.dp))
-        Text(text = label, style = MaterialTheme.typography.labelSmall)
     }
 }
 

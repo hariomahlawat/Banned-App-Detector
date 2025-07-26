@@ -71,11 +71,11 @@ System applications and services are automatically filtered out so the report
 focuses on third‑party packages only. While scanning is in progress the screen
 shows a loading indicator.
 
-The results screen begins with a summary card showing how many apps were
-scanned and how many fall into the HIGH, MEDIUM and LOW categories. The card
-also highlights the number of packages originating from Chinese publishers.
-These apps are listed in a separate section. If no Chinese origin apps are
-found, a green success message is shown instead.
+The results screen begins with a dynamic summary card. It states how many apps
+were scanned and either confirms that no problems were detected or lists the
+issues found. Issues may include apps from Chinese publishers, direct APK
+installs, modified packages or those requesting many dangerous permissions.
+Any detected apps are then shown in their own sections below.
 
 The asset files are stored in `src/main/assets`:
 
