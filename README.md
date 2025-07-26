@@ -10,6 +10,7 @@ a single `app` module for simplicity.
 ## How It Works
 
 Tap Scan to enumerate monitored packages via PackageManager. Results are persisted locally in DataStore and shown in a Compose list with status chips.
+When sharing your scan results you can now enter a name which is printed on the screenshot so the recipient knows who sent it.
 
 ## Privacy and Policy
 
