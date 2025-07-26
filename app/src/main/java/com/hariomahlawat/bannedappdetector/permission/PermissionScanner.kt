@@ -60,6 +60,8 @@ class PermissionScanner(private val context: Context) {
         val rating = online.rating
         val negativeRatio = ReviewSentimentAnalyzer().negativeRatio(online.reviews)
         val snippet = online.reviews.firstOrNull()
+        val reviewCount = online.reviews.size
+        val fromCache = online.fromCache
 
         var score = computeRiskScore(high, medium, low, app.packageName, chinese)
         if (rating != null && rating < 3f) score += 2
@@ -81,7 +83,9 @@ class PermissionScanner(private val context: Context) {
             backgroundPermissions = background,
             rating = rating,
             negativeReviewRatio = negativeRatio,
-            reviewSnippets = listOfNotNull(snippet)
+            reviewCount = reviewCount,
+            reviews = online.reviews,
+            fromCache = fromCache
         )
     }
 
@@ -181,5 +185,7 @@ data class AppRiskReport(
     val backgroundPermissions: List<String>,
     val rating: Float?,
     val negativeReviewRatio: Float,
-    val reviewSnippets: List<String>
+    val reviewCount: Int,
+    val reviews: List<String>,
+    val fromCache: Boolean
 )

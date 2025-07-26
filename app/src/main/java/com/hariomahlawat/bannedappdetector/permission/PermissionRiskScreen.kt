@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hariomahlawat.bannedappdetector.IssueSummary
@@ -54,6 +55,7 @@ import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
 import com.hariomahlawat.bannedappdetector.ui.theme.ErrorRed
 import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
+import com.hariomahlawat.bannedappdetector.util.KeywordExtractor
 import com.hariomahlawat.bannedappdetector.util.setSystemBars
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -151,10 +153,23 @@ fun PermissionRiskScreen(
                         }
                         val ratings = state.results.mapNotNull { it.rating }
                         val avg = if (ratings.isNotEmpty()) ratings.average().toFloat() else 0f
-                        val lowCount = state.results.count { (it.rating != null && it.rating < 3f) || it.negativeReviewRatio > 0.3f }
-                        val offenders = state.results.sortedByDescending { it.negativeReviewRatio }.take(3)
+                        val lowThreshold = 3.5f
+                        val lowRated = state.results.filter { it.rating != null && it.rating < lowThreshold }
+                        val reviewedCount = state.results.count { it.reviewCount > 0 }
+                        val negativeThreshold = 0.4f
+                        val offenders = state.results
+                            .filter { it.negativeReviewRatio > negativeThreshold }
+                            .sortedByDescending { it.negativeReviewRatio }
+                        val offline = state.results.any { it.fromCache }
                         item {
-                            RatingSummaryCard(avg, lowCount, offenders)
+                            RatingSummaryCard(
+                                avgRating = avg,
+                                totalApps = state.results.size,
+                                lowRated = lowRated,
+                                reviewedCount = reviewedCount,
+                                offenders = offenders,
+                                offline = offline
+                            )
                             Spacer(Modifier.height(16.dp))
                         }
                     }
@@ -264,7 +279,7 @@ private fun RiskRow(report: AppRiskReport) {
             val chinese = if (report.chineseOrigin) " 🇨🇳" else ""
             Column {
                 Text(report.app.packageName + chinese, style = MaterialTheme.typography.bodySmall)
-                report.reviewSnippets.firstOrNull()?.let { snippet ->
+                report.reviews.firstOrNull()?.let { snippet ->
                     Text(
                         "\"$snippet\"",
                         style = MaterialTheme.typography.bodySmall,
@@ -301,7 +316,14 @@ private fun RiskRow(report: AppRiskReport) {
 
 
 @Composable
-private fun RatingSummaryCard(avgRating: Float, lowCount: Int, offenders: List<AppRiskReport>) {
+private fun RatingSummaryCard(
+    avgRating: Float,
+    totalApps: Int,
+    lowRated: List<AppRiskReport>,
+    reviewedCount: Int,
+    offenders: List<AppRiskReport>,
+    offline: Boolean
+) {
     Surface(
         modifier = Modifier
             .glassCard(Color.Black.copy(alpha = .45f))
@@ -310,23 +332,65 @@ private fun RatingSummaryCard(avgRating: Float, lowCount: Int, offenders: List<A
     ) {
         Column(Modifier.padding(16.dp)) {
             Text(
-                "Average rating: ${"%.2f".format(avgRating)}",
+                String.format("%.1f / 5 across %d scanned apps", avgRating, totalApps),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Spacer(Modifier.height(4.dp))
+            if (offline) {
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    "Some rating data may be outdated.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontStyle = FontStyle.Italic
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
+            Text("Low-rating apps", style = MaterialTheme.typography.titleMedium, color = BrandGold)
+            if (lowRated.isEmpty()) {
+                Text("None", style = MaterialTheme.typography.bodySmall)
+            } else {
+                lowRated.forEach { rep ->
+                    val ratingText = if (rep.reviewCount < 10) {
+                        "Not enough data"
+                    } else {
+                        String.format("%.1f ★", rep.rating)
+                    }
+                    Row(Modifier.fillMaxWidth()) {
+                        Text(rep.app.appName, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                        Text(ratingText, style = MaterialTheme.typography.bodySmall)
+                    }
+                    rep.reviews.firstOrNull()?.let { snippet ->
+                        Text(
+                            "\"$snippet\"",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Spacer(Modifier.height(4.dp))
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
             Text(
-                "Low rated apps: $lowCount",
+                "Reviews scanned for $reviewedCount apps",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            if (offenders.isNotEmpty()) {
-                Spacer(Modifier.height(8.dp))
-                Text("Top offenders:", style = MaterialTheme.typography.bodySmall)
+            if (offenders.isEmpty()) {
+                Text(
+                    "No apps with significant negative-review trends detected.",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            } else {
+                Spacer(Modifier.height(4.dp))
                 offenders.forEach { rep ->
+                    val keywords = KeywordExtractor().topKeywords(rep.reviews)
                     Text(
-                        "- ${rep.app.appName} (${(rep.negativeReviewRatio * 100).toInt()}% negative)",
-                        style = MaterialTheme.typography.bodySmall
+                        "- ${rep.app.appName} ${(rep.negativeReviewRatio * 100).toInt()}% negative ${if (keywords.isNotEmpty()) keywords.joinToString(prefix = "(", postfix = ")") else ""}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (rep.negativeReviewRatio > 0.4f) ErrorRed else MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
