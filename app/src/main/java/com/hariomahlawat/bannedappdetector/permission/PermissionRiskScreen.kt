@@ -55,10 +55,10 @@ import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientEnd
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
 import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
 import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
+import com.hariomahlawat.bannedappdetector.ui.theme.ErrorRed
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
 import com.hariomahlawat.bannedappdetector.util.setSystemBars
 
-private val ErrorRed = Color(0xFFE53935)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PermissionRiskScreen(

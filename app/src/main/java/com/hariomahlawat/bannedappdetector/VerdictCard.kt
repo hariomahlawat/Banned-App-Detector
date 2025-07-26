@@ -41,7 +41,6 @@ data class IssueSummary(
 
 @Composable
 fun VerdictCard(
-    summary: SummaryStats,
     issues: IssueSummary,
     onViewDetails: () -> Unit,
     modifier: Modifier = Modifier
@@ -83,7 +82,6 @@ fun VerdictCard(
             /* chips – show only if any issue exists */
             if (hasIssues) {
                 Spacer(Modifier.height(10.dp))
-                FlowRow(horizontalGap = 8.dp, verticalGap = 4.dp) {
                     IssueChip("\uD83C\uDDE8\uD83C\uDDF3", issues.chinese)
                     IssueChip("⬇", issues.sideloaded)
                     IssueChip("\uD83D\uDEE0", issues.modded)
