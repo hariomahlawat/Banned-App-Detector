@@ -310,10 +310,10 @@ private fun HomeContent(
         Spacer(Modifier.height(20.dp))
 
         /* summary appears after banned/unwanted scan */
-        state.summary?.let {
-            HomeSummaryCard(it, state.lastScanAt, navToResults)
-            Spacer(Modifier.height(20.dp))
-        }
+//        state.summary?.let {
+//            HomeSummaryCard(it, state.lastScanAt, navToResults)
+//            Spacer(Modifier.height(20.dp))
+//        }
 
         AppInfoFooter(Modifier.padding(bottom = 12.dp))
     }
