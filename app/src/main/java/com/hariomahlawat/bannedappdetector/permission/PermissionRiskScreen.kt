@@ -144,6 +144,14 @@ fun PermissionRiskScreen(
                             DeveloperOptionsCard(state.developerOptionsEnabled)
                             Spacer(Modifier.height(16.dp))
                         }
+                        val ratings = state.results.mapNotNull { it.rating }
+                        val avg = if (ratings.isNotEmpty()) ratings.average().toFloat() else 0f
+                        val lowCount = state.results.count { (it.rating != null && it.rating < 3f) || it.negativeReviewRatio > 0.3f }
+                        val offenders = state.results.sortedByDescending { it.negativeReviewRatio }.take(3)
+                        item {
+                            RatingSummaryCard(avg, lowCount, offenders)
+                            Spacer(Modifier.height(16.dp))
+                        }
                     }
 
                     item {
@@ -248,10 +256,30 @@ private fun RiskRow(report: AppRiskReport) {
         headlineContent = { Text(report.app.appName, color = BrandGold) },
         supportingContent = {
             val chinese = if (report.chineseOrigin) " 🇨🇳" else ""
-            Text(report.app.packageName + chinese, style = MaterialTheme.typography.bodySmall)
+            Column {
+                Text(report.app.packageName + chinese, style = MaterialTheme.typography.bodySmall)
+                report.reviewSnippets.firstOrNull()?.let { snippet ->
+                    Text(
+                        "\"$snippet\"",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         },
         trailingContent = {
-            Text("Score: ${report.riskScore}", style = MaterialTheme.typography.labelSmall)
+            Column(horizontalAlignment = Alignment.End) {
+                Text("Score: ${report.riskScore}", style = MaterialTheme.typography.labelSmall)
+                report.rating?.let { r ->
+                    val warn = r < 3f || report.negativeReviewRatio > 0.3f
+                    val col = if (warn) ErrorRed else BrandGold
+                    Text(
+                        String.format("%.1f ★", r),
+                        color = col,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
         },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = Modifier
@@ -289,6 +317,40 @@ private fun SummaryCard(summary: PermissionScanSummary) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+    }
+}
+
+@Composable
+private fun RatingSummaryCard(avgRating: Float, lowCount: Int, offenders: List<AppRiskReport>) {
+    Surface(
+        modifier = Modifier
+            .glassCard(Color.Black.copy(alpha = .45f))
+            .fillMaxWidth(),
+        tonalElevation = 1.dp
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(
+                "Average rating: ${"%.2f".format(avgRating)}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "Low rated apps: $lowCount",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            if (offenders.isNotEmpty()) {
+                Spacer(Modifier.height(8.dp))
+                Text("Top offenders:", style = MaterialTheme.typography.bodySmall)
+                offenders.forEach { rep ->
+                    Text(
+                        "- ${rep.app.appName} (${(rep.negativeReviewRatio * 100).toInt()}% negative)",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
         }
     }
 }
