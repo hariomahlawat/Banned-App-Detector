@@ -1,5 +1,6 @@
 package com.hariomahlawat.bannedappdetector.permission
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -250,6 +251,7 @@ fun PermissionRiskScreen(
     }
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 private fun RiskRow(report: AppRiskReport) {
     ListItem(
@@ -310,13 +312,6 @@ private fun SummaryCard(summary: PermissionScanSummary) {
                 MetricTile(summary.mediumRisk.toString(), "MED", Icons.Default.Warning, WarningYellow)
                 MetricTile(summary.total.toString(), "SCANNED", Icons.Default.Inbox, BrandGold)
             }
-
-            Spacer(Modifier.height(8.dp))
-            Text(
-                "Chinese origin apps: ${summary.chinese}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }
