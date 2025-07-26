@@ -58,6 +58,7 @@ import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
 import com.hariomahlawat.bannedappdetector.ui.theme.ErrorRed
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
 import com.hariomahlawat.bannedappdetector.util.setSystemBars
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PermissionRiskScreen(

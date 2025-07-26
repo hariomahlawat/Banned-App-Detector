@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
@@ -29,7 +28,6 @@ import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
 import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
 import com.hariomahlawat.bannedappdetector.ui.theme.ErrorRed
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
-import com.hariomahlawat.bannedappdetector.permission.PermissionScanSummary
 
 /* mirror of the Issue counters you already build in HomeScreen */
 data class IssueSummary(
@@ -43,7 +41,6 @@ data class IssueSummary(
 
 @Composable
 fun VerdictCard(
-    summary: PermissionScanSummary,
     issues: IssueSummary,
     onViewDetails: () -> Unit,
     modifier: Modifier = Modifier
@@ -85,10 +82,6 @@ fun VerdictCard(
             /* chips – show only if any issue exists */
             if (hasIssues) {
                 Spacer(Modifier.height(10.dp))
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
                     IssueChip("\uD83C\uDDE8\uD83C\uDDF3", issues.chinese)
                     IssueChip("⬇", issues.sideloaded)
                     IssueChip("\uD83D\uDEE0", issues.modded)
