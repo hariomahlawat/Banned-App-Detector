@@ -175,6 +175,7 @@ fun HomeScreen(
             HomeContent(
                 state = state,
                 onScanComplete = onViewResults,
+                onScan = viewModel::onScan,
                 onViewResults = onViewResults,
                 onViewBannedApps = onViewBannedApps,
                 onAiScanComplete = onAiScan,
@@ -194,6 +195,7 @@ fun HomeScreen(
 private fun HomeContent(
     state: HomeUiState,
     onScanComplete: () -> Unit,
+    onScan: () -> Unit,
     onViewResults: () -> Unit,
     onViewBannedApps: () -> Unit,
     onAiScanComplete: () -> Unit,
@@ -288,7 +290,10 @@ private fun HomeContent(
             ScanButton(
                 isAnimating = scanAnimating,
                 progress = scanProgress.value,
-                onClick = { scanAnimating = true },
+                onClick = {
+                    onScan()
+                    scanAnimating = true
+                },
                 modifier = Modifier.fillMaxWidth()
             )
             if (scanProgress.value > 0f) {
