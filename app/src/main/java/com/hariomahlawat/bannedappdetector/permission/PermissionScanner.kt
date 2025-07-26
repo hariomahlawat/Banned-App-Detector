@@ -5,9 +5,13 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ApplicationInfo
 import android.net.Uri
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import android.provider.Settings
 import com.hariomahlawat.bannedappdetector.util.OnlineMetadataFetcher
 import com.hariomahlawat.bannedappdetector.util.ReviewSentimentAnalyzer
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -15,14 +19,17 @@ import java.io.InputStreamReader
 /**
  * Scans installed apps for sensitive permissions and computes a risk score.
  */
-class PermissionScanner(private val context: Context) {
+class PermissionScanner @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val metadataFetcher: OnlineMetadataFetcher,
+    private val sentimentAnalyzer: ReviewSentimentAnalyzer
+) : AppRiskActionHandler {
 
     private val pm = context.packageManager
     private val permissionMap: Map<String, PermissionInfo> by lazy { loadPermissionMap() }
     private val trustedApps: List<String> by lazy { loadListFromAsset("trusted_apps.json") }
     private val chinesePublishers: List<String> by lazy { loadListFromAsset("chinese_publishers.json") }
 
-    private val metadataFetcher = OnlineMetadataFetcher(context)
 
     private val officialInstallers = setOf(
         "com.android.vending",
@@ -58,14 +65,13 @@ class PermissionScanner(private val context: Context) {
 
         val online = metadataFetcher.fetch(app.packageName)
         val rating = online.rating
-        val negativeRatio = ReviewSentimentAnalyzer().negativeRatio(online.reviews)
-        val snippet = online.reviews.firstOrNull()
+        val negativeRatio = sentimentAnalyzer.negativeRatio(online.reviews)
         val reviewCount = online.reviews.size
         val fromCache = online.fromCache
 
         var score = computeRiskScore(high, medium, low, app.packageName, chinese)
-        if (rating != null && rating < 3f) score += 2
-        if (negativeRatio > 0.3f) score += (negativeRatio * 10).toInt()
+        if (rating != null && rating < 3f) score += RiskWeights.RATING_PENALTY
+        if (negativeRatio > 0.3f) score += (negativeRatio * RiskWeights.NEGATIVE_MULTIPLIER).toInt()
 
         val background = app.permissions.filter { permissionMap[it]?.type == "PASSIVE" }
         val sideloaded = isSideloaded(app.packageName)
@@ -89,10 +95,19 @@ class PermissionScanner(private val context: Context) {
         )
     }
 
-    private fun computeRiskScore(high: List<String>, medium: List<String>, low: List<String>, packageName: String, chinese: Boolean): Int {
-        var score = high.size * 5 + medium.size * 3 + low.size
-        if (chinese) score += 3
-        if (packageName in trustedApps) score = kotlin.math.max(score - 5, 1)
+    /** Compute a 0-100 risk score using configurable weights. */
+    private fun computeRiskScore(
+        high: List<String>,
+        medium: List<String>,
+        low: List<String>,
+        packageName: String,
+        chinese: Boolean
+    ): Int {
+        var score = high.size * RiskWeights.HIGH +
+            medium.size * RiskWeights.MEDIUM +
+            low.size * RiskWeights.LOW
+        if (chinese) score += RiskWeights.CHINESE
+        if (packageName in trustedApps) score = kotlin.math.max(score - RiskWeights.HIGH, 1)
         return score
     }
 
@@ -148,7 +163,7 @@ class PermissionScanner(private val context: Context) {
         }
     }
 
-    fun openAppSettings(packageName: String) {
+    override fun openSettings(packageName: String) {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
             data = Uri.parse("package:$packageName")
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -156,7 +171,7 @@ class PermissionScanner(private val context: Context) {
         context.startActivity(intent)
     }
 
-    fun promptUninstall(packageName: String) {
+    override fun promptUninstall(packageName: String) {
         val intent = Intent(Intent.ACTION_DELETE).apply {
             data = Uri.parse("package:$packageName")
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -166,13 +181,15 @@ class PermissionScanner(private val context: Context) {
 }
 
 /** Holds permissions of an installed app. */
+@Parcelize
 data class AppPermissions(
     val appName: String,
     val packageName: String,
     val permissions: List<String>
-)
+) : Parcelable
 
 /** Report with categorized permissions and risk score. */
+@Parcelize
 data class AppRiskReport(
     val app: AppPermissions,
     val highRiskPermissions: List<String>,
@@ -188,4 +205,4 @@ data class AppRiskReport(
     val reviewCount: Int,
     val reviews: List<String>,
     val fromCache: Boolean
-)
+) : Parcelable

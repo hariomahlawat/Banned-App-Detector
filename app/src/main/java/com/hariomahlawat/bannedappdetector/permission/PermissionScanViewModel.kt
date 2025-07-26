@@ -16,7 +16,10 @@ data class PermissionScanState(
     val isScanning: Boolean = false,
     val results: List<AppRiskReport> = emptyList(),
     val summary: PermissionScanSummary? = null,
-    val developerOptionsEnabled: Boolean = false
+    val developerOptionsEnabled: Boolean = false,
+    val buckets: AppRiskBuckets = AppRiskBuckets(),
+    val reviewInsights: ReviewInsights? = null,
+    val error: String? = null
 )
 
 data class PermissionScanSummary(
@@ -27,11 +30,29 @@ data class PermissionScanSummary(
     val chinese: Int
 )
 
+data class AppRiskBuckets(
+    val chinese: List<AppRiskReport> = emptyList(),
+    val high: List<AppRiskReport> = emptyList(),
+    val medium: List<AppRiskReport> = emptyList(),
+    val low: List<AppRiskReport> = emptyList(),
+    val sideloaded: List<AppRiskReport> = emptyList(),
+    val modded: List<AppRiskReport> = emptyList(),
+    val background: List<AppRiskReport> = emptyList()
+)
+
+data class ReviewInsights(
+    val avgRating: Float,
+    val lowRated: List<AppRiskReport>,
+    val offenders: List<AppRiskReport>,
+    val reviewedCount: Int,
+    val offline: Boolean
+)
+
 @HiltViewModel
 class PermissionScanViewModel @Inject constructor(
     private val scanner: PermissionScanner,
     private val io: CoroutineDispatcher
-) : ViewModel() {
+) : ViewModel(), AppRiskActionHandler by scanner {
     private val _state = MutableStateFlow(PermissionScanState())
     val state: StateFlow<PermissionScanState> = _state.asStateFlow()
 
@@ -39,25 +60,53 @@ class PermissionScanViewModel @Inject constructor(
         if (_state.value.isScanning) return
         viewModelScope.launch {
             _state.value = PermissionScanState(isScanning = true)
-            val results = withContext(io) { scanner.scanInstalledApps() }
-            val devOptions = scanner.isDeveloperOptionsEnabled()
-            val summary = PermissionScanSummary(
-                total = results.size,
-                highRisk = results.count { it.highRiskPermissions.isNotEmpty() },
-                mediumRisk = results.count {
-                    it.highRiskPermissions.isEmpty() && it.mediumRiskPermissions.isNotEmpty()
-                },
-                lowRisk = results.count {
-                    it.highRiskPermissions.isEmpty() && it.mediumRiskPermissions.isEmpty()
-                },
-                chinese = results.count { it.chineseOrigin }
-            )
-            _state.value = PermissionScanState(
-                isScanning = false,
-                results = results,
-                summary = summary,
-                developerOptionsEnabled = devOptions
-            )
+            try {
+                val results = withContext(io) { scanner.scanInstalledApps() }
+                val devOptions = scanner.isDeveloperOptionsEnabled()
+
+                val buckets = AppRiskBuckets(
+                    chinese = results.filter { it.chineseOrigin },
+                    high = results.filter { !it.chineseOrigin && it.highRiskPermissions.isNotEmpty() },
+                    medium = results.filter { !it.chineseOrigin && it.highRiskPermissions.isEmpty() && it.mediumRiskPermissions.isNotEmpty() },
+                    low = results.filter { !it.chineseOrigin && it.highRiskPermissions.isEmpty() && it.mediumRiskPermissions.isEmpty() },
+                    sideloaded = results.filter { it.sideloaded },
+                    modded = results.filter { it.modApp },
+                    background = results.filter { it.backgroundPermissions.isNotEmpty() }
+                )
+
+                val summary = PermissionScanSummary(
+                    total = results.size,
+                    highRisk = buckets.high.size,
+                    mediumRisk = buckets.medium.size,
+                    lowRisk = buckets.low.size,
+                    chinese = buckets.chinese.size
+                )
+
+                val ratings = results.mapNotNull { it.rating }
+                val avgRating = if (ratings.isNotEmpty()) ratings.average().toFloat() else 0f
+                val lowRated = results.filter { it.rating != null && it.rating < 3.5f }
+                val reviewedCount = results.count { it.reviewCount > 0 }
+                val offenders = results.filter { it.negativeReviewRatio > 0.4f }
+                    .sortedByDescending { it.negativeReviewRatio }
+                val offline = results.any { it.fromCache }
+                val insights = ReviewInsights(avgRating, lowRated, offenders, reviewedCount, offline)
+
+                _state.value = PermissionScanState(
+                    isScanning = false,
+                    results = results,
+                    summary = summary,
+                    developerOptionsEnabled = devOptions,
+                    buckets = buckets,
+                    reviewInsights = insights
+                )
+            } catch (e: Exception) {
+                val devOptions = scanner.isDeveloperOptionsEnabled()
+                _state.value = PermissionScanState(
+                    isScanning = false,
+                    developerOptionsEnabled = devOptions,
+                    error = e.message
+                )
+            }
         }
     }
 }

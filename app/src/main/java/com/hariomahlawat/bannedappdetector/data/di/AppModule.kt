@@ -18,6 +18,8 @@ import com.hariomahlawat.bannedappdetector.util.StandardDispatcherProvider
 import com.hariomahlawat.bannedappdetector.update.AppUpdateRepository
 import com.hariomahlawat.bannedappdetector.update.PlayAppUpdateRepository
 import com.hariomahlawat.bannedappdetector.permission.PermissionScanner
+import com.hariomahlawat.bannedappdetector.util.OnlineMetadataFetcher
+import com.hariomahlawat.bannedappdetector.util.ReviewSentimentAnalyzer
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import dagger.Module
@@ -80,6 +82,16 @@ object AppModule {
     fun summaryUseCase() = ComputeSummaryStatsUseCase()
 
     @Provides
-    fun permissionScanner(@ApplicationContext context: Context) =
-        PermissionScanner(context)
+    fun onlineMetadataFetcher(@ApplicationContext context: Context) =
+        OnlineMetadataFetcher(context)
+
+    @Provides
+    fun sentimentAnalyzer() = ReviewSentimentAnalyzer()
+
+    @Provides
+    fun permissionScanner(
+        @ApplicationContext context: Context,
+        fetcher: OnlineMetadataFetcher,
+        analyzer: ReviewSentimentAnalyzer
+    ) = PermissionScanner(context, fetcher, analyzer)
 }
