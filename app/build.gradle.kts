@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.compose.compiler)    // NEW for Kotlin 2.x
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {

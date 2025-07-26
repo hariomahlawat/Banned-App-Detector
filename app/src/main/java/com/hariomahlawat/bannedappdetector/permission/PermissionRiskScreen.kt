@@ -64,6 +64,7 @@ import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
 import com.hariomahlawat.bannedappdetector.util.KeywordExtractor
 import com.hariomahlawat.bannedappdetector.util.setSystemBars
+import com.hariomahlawat.bannedappdetector.permission.AppRiskActionHandler
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -122,22 +123,17 @@ fun PermissionRiskScreen(
                     .padding(padding), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
-            } else {
-                val chineseApps = state.results.filter { it.chineseOrigin }
-                val highRisk = state.results.filter { !it.chineseOrigin && it.highRiskPermissions.isNotEmpty() }
-                val mediumRisk = state.results.filter { !it.chineseOrigin && it.highRiskPermissions.isEmpty() && it.mediumRiskPermissions.isNotEmpty() }
-                state.results.filter { !it.chineseOrigin && it.highRiskPermissions.isEmpty() && it.mediumRiskPermissions.isEmpty() }
-
-                val sideloaded = state.results.filter { it.sideloaded }
-                val modded = state.results.filter { it.modApp }
-                val background = state.results.filter { it.backgroundPermissions.isNotEmpty() }
-
-                val permissionMap = mutableMapOf<String, MutableList<String>>()
-                state.results.forEach { report ->
-                    report.highRiskPermissions.forEach { perm ->
-                        permissionMap.getOrPut(perm) { mutableListOf() } += report.app.appName
-                    }
+            } else if (state.error != null) {
+                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                    Text(state.error ?: "Unknown error", color = MaterialTheme.colorScheme.error)
                 }
+            } else {
+                val chineseApps = state.buckets.chinese
+                val highRisk = state.buckets.high
+                val mediumRisk = state.buckets.medium
+                val sideloaded = state.buckets.sideloaded
+                val modded = state.buckets.modded
+                val background = state.buckets.background
 
                 LazyColumn(Modifier
                     .fillMaxSize()
@@ -159,33 +155,27 @@ fun PermissionRiskScreen(
                             DeveloperOptionsCard(state.developerOptionsEnabled)
                             Spacer(Modifier.height(16.dp))
                         }
-                        val ratings = state.results.mapNotNull { it.rating }
-                        val avg = if (ratings.isNotEmpty()) ratings.average().toFloat() else 0f
+                        val insights = state.reviewInsights
                         val lowThreshold = 3.5f
-                        val lowRated = state.results.filter { it.rating != null && it.rating < lowThreshold }
-                        val reviewedCount = state.results.count { it.reviewCount > 0 }
-                        val negativeThreshold = 0.4f
-                        val offenders = state.results
-                            .filter { it.negativeReviewRatio > negativeThreshold }
-                            .sortedByDescending { it.negativeReviewRatio }
-                        val offline = state.results.any { it.fromCache }
                         item {
-                            RatingsOverviewCard(
-                                avgRating = avg,
-                                totalApps = state.results.size,
-                                lowRated = lowRated,
-                                offenders = offenders,
-                                offline = offline
-                            )
-                            Spacer(Modifier.height(8.dp))
-                            LowRatingAppsCard(lowRated, lowThreshold)
-                            Spacer(Modifier.height(8.dp))
-                            ReviewSentimentCard(
-                                reviewedCount = reviewedCount,
-                                offenders = offenders,
-                                negativeThreshold = negativeThreshold
-                            )
-                            Spacer(Modifier.height(16.dp))
+                            insights?.let {
+                                RatingsOverviewCard(
+                                    avgRating = it.avgRating,
+                                    totalApps = state.results.size,
+                                    lowRated = it.lowRated,
+                                    offenders = it.offenders,
+                                    offline = it.offline
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                LowRatingAppsCard(it.lowRated, lowThreshold)
+                                Spacer(Modifier.height(8.dp))
+                                ReviewSentimentCard(
+                                    reviewedCount = it.reviewedCount,
+                                    offenders = it.offenders,
+                                    negativeThreshold = 0.4f
+                                )
+                                Spacer(Modifier.height(16.dp))
+                            }
                         }
                     }
 
@@ -204,7 +194,7 @@ fun PermissionRiskScreen(
                                     modifier = Modifier.padding(16.dp)
                                 )
                             } else {
-                                chineseApps.forEach { RiskRow(it) }
+                                chineseApps.forEach { RiskRow(it, viewModel) }
                             }
                         }
                     }
@@ -224,7 +214,7 @@ fun PermissionRiskScreen(
                                     modifier = Modifier.padding(16.dp)
                                 )
                             } else {
-                                sideloaded.forEach { RiskRow(it) }
+                                sideloaded.forEach { RiskRow(it, viewModel) }
                             }
                         }
                     }
@@ -236,7 +226,7 @@ fun PermissionRiskScreen(
                             explanation = "These packages may have been modified or patched.",
                             shadowColor = if (modded.isEmpty()) SuccessGreen else ErrorRed,
                         ) {
-                            modded.forEach { RiskRow(it) }
+                            modded.forEach { RiskRow(it, viewModel) }
                         }
                     }
 
@@ -247,7 +237,7 @@ fun PermissionRiskScreen(
                             explanation = "Apps requesting background permissions like microphone or location.",
                             shadowColor = if (background.isEmpty()) SuccessGreen else ErrorRed,
                         ) {
-                            background.forEach { RiskRow(it) }
+                            background.forEach { RiskRow(it, viewModel) }
                         }
                     }
 
@@ -258,7 +248,7 @@ fun PermissionRiskScreen(
                             explanation = "Apps requesting many dangerous permissions.",
                             shadowColor = if (highRisk.isEmpty()) SuccessGreen else ErrorRed,
                         ) {
-                            highRisk.forEach { RiskRow(it) }
+                            highRisk.forEach { RiskRow(it, viewModel) }
                         }
                     }
 
@@ -269,7 +259,7 @@ fun PermissionRiskScreen(
                             explanation = "Apps requesting some sensitive permissions.",
                             shadowColor = if (mediumRisk.isEmpty()) SuccessGreen else ErrorRed,
                         ) {
-                            mediumRisk.forEach { RiskRow(it) }
+                            mediumRisk.forEach { RiskRow(it, viewModel) }
                         }
                     }
 
@@ -287,7 +277,7 @@ fun PermissionRiskScreen(
 
 @SuppressLint("DefaultLocale")
 @Composable
-private fun RiskRow(report: AppRiskReport) {
+private fun RiskRow(report: AppRiskReport, actions: AppRiskActionHandler) {
     ListItem(
         headlineContent = { Text(report.app.appName, color = BrandGold) },
         supportingContent = {
@@ -314,6 +304,14 @@ private fun RiskRow(report: AppRiskReport) {
                         color = col,
                         style = MaterialTheme.typography.labelSmall
                     )
+                }
+                Row {
+                    IconButton(onClick = { actions.openSettings(report.app.packageName) }) {
+                        Icon(painterResource(android.R.drawable.ic_menu_manage), contentDescription = "Open settings", tint = BrandGold)
+                    }
+                    IconButton(onClick = { actions.promptUninstall(report.app.packageName) }) {
+                        Icon(painterResource(android.R.drawable.ic_menu_delete), contentDescription = "Uninstall", tint = BrandGold)
+                    }
                 }
             }
         },
