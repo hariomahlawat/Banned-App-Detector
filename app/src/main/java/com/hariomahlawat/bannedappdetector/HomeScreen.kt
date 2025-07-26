@@ -62,6 +62,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlin.math.max
 import com.hariomahlawat.bannedappdetector.components.AppInfoFooter
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientEnd
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
@@ -134,7 +135,8 @@ fun HomeScreen(
                 navToResults = onViewResults,
                 navToMonitoredList = onViewBannedApps,
                 navToAiResults = onAiScan,
-                onIncludeToggle = viewModel::setIncludeUnwanted
+                onIncludeToggle = viewModel::setIncludeUnwanted,
+                measureAiScanTime = viewModel::measureAiScanTime
             )
         }
 
@@ -152,7 +154,8 @@ private fun HomeContent(
     navToResults: () -> Unit,
     navToMonitoredList: () -> Unit,
     navToAiResults: () -> Unit,
-    onIncludeToggle: (Boolean) -> Unit
+    onIncludeToggle: (Boolean) -> Unit,
+    measureAiScanTime: suspend () -> Long
 ) {
     /* progress anims */
     var bannedAnimating by remember { mutableStateOf(false) }
@@ -168,7 +171,10 @@ private fun HomeContent(
     }
     LaunchedEffect(aiAnimating) {
         if (aiAnimating) {
-            aiProg.snapTo(0f); aiProg.animateTo(1f, tween(4000))
+            val scanTime = measureAiScanTime()
+            val duration = max(4000L, scanTime)
+            aiProg.snapTo(0f)
+            aiProg.animateTo(1f, tween(duration.toInt()))
             navToAiResults(); aiAnimating = false
         } else aiProg.snapTo(0f)
     }

@@ -6,6 +6,9 @@ import com.hariomahlawat.bannedappdetector.repository.MonitoredAppsRepository
 import com.hariomahlawat.bannedappdetector.usecase.ComputeSummaryStatsUseCase
 import com.hariomahlawat.bannedappdetector.usecase.GetScanResultsFlowUseCase
 import com.hariomahlawat.bannedappdetector.usecase.ScanMonitoredAppsUseCase
+import com.hariomahlawat.bannedappdetector.permission.PermissionScanner
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,7 +37,9 @@ class HomeViewModel @Inject constructor(
     private val scan: ScanMonitoredAppsUseCase,
     private val resultsFlow: GetScanResultsFlowUseCase,
     private val summaryUseCase: ComputeSummaryStatsUseCase,
-    private val monitoredRepo: MonitoredAppsRepository
+    private val monitoredRepo: MonitoredAppsRepository,
+    private val permissionScanner: PermissionScanner,
+    private val io: CoroutineDispatcher
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -96,4 +101,10 @@ class HomeViewModel @Inject constructor(
     fun setIncludeUnwanted(value: Boolean) { _state.update { it.copy(includeUnwanted = value) } }
 
     fun dismissMessage() { _state.update { it.copy(message = null) } }
+
+    suspend fun measureAiScanTime(): Long {
+        val start = System.currentTimeMillis()
+        withContext(io) { permissionScanner.scanInstalledApps() }
+        return System.currentTimeMillis() - start
+    }
 }
