@@ -48,23 +48,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.hariomahlawat.bannedappdetector.IssueSummary
+import com.hariomahlawat.bannedappdetector.VerdictCard
 import com.hariomahlawat.bannedappdetector.components.AppInfoFooter
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientEnd
 import com.hariomahlawat.bannedappdetector.ui.theme.BgGradientStart
 import com.hariomahlawat.bannedappdetector.ui.theme.BrandGold
 import com.hariomahlawat.bannedappdetector.ui.theme.SuccessGreen
+import com.hariomahlawat.bannedappdetector.ui.theme.ErrorRed
 import com.hariomahlawat.bannedappdetector.ui.theme.glassCard
 import com.hariomahlawat.bannedappdetector.util.setSystemBars
-
-private val ErrorRed = Color(0xFFE53935)
-
-/** Simple container for counts of notable issues found during scanning. */
-data class IssueSummary(
-    val chinese: Int = 0,
-    val sideloaded: Int = 0,
-    val modded: Int = 0,
-    val highRisk: Int = 0
-)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PermissionRiskScreen(
@@ -150,7 +143,11 @@ fun PermissionRiskScreen(
                             highRisk = highRisk.size
                         )
                         item {
-                            SummaryCard(summary, issueSummary)
+                            VerdictCard(
+                                summary = summary,
+                                issues = issueSummary,
+                                onViewDetails = {}
+                            )
                             Spacer(Modifier.height(8.dp))
                             DeveloperOptionsCard(state.developerOptionsEnabled)
                             Spacer(Modifier.height(16.dp))
@@ -305,42 +302,6 @@ private fun RiskRow(report: AppRiskReport) {
     )
 }
 
-@Composable
-private fun SummaryCard(summary: PermissionScanSummary, issues: IssueSummary) {
-    val issueCount = issues.chinese + issues.sideloaded + issues.modded + issues.highRisk
-    val message = if (issueCount == 0) {
-        "\uD83C\uDF89  ${summary.total} apps scanned. No major issues detected."
-    } else {
-        buildString {
-            append("${summary.total} apps scanned. $issueCount issue")
-            if (issueCount > 1) append("s")
-            append(" found: ")
-            val parts = mutableListOf<String>()
-            if (issues.chinese > 0) parts += "${issues.chinese} Chinese app"
-            if (issues.sideloaded > 0) parts += "${issues.sideloaded} sideloaded"
-            if (issues.modded > 0) parts += "${issues.modded} modded"
-            if (issues.highRisk > 0) parts += "${issues.highRisk} high risk"
-            append(parts.joinToString(", "))
-            append('.')
-        }
-    }
-
-    val colour = if (issueCount == 0) SuccessGreen else ErrorRed
-    Surface(
-        modifier = Modifier
-            .glassCard(Color.Black.copy(alpha = .45f))
-            .fillMaxWidth(),
-        tonalElevation = 1.dp
-    ) {
-        Column(Modifier.padding(16.dp)) {
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodyMedium,
-                color = colour
-            )
-        }
-    }
-}
 
 @Composable
 private fun RatingSummaryCard(avgRating: Float, lowCount: Int, offenders: List<AppRiskReport>) {
