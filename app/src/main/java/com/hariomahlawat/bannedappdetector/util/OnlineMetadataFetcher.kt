@@ -11,7 +11,8 @@ import android.content.Context
 class OnlineMetadataFetcher(private val context: Context) {
     data class OnlineMetadata(
         val rating: Float?,
-        val reviews: List<String>
+        val reviews: List<String>,
+        val fromCache: Boolean
     )
 
     /**
@@ -33,7 +34,7 @@ class OnlineMetadataFetcher(private val context: Context) {
                 val arr = obj.getJSONArray("reviews")
                 MutableList(arr.length()) { i -> arr.getString(i) }
             } else emptyList()
-            OnlineMetadata(rating, reviews)
+            OnlineMetadata(rating, reviews, fromCache = false)
         } catch (e: Exception) {
             // Fallback when offline or the service is unreachable.
             loadFromAsset(packageName)
@@ -44,16 +45,16 @@ class OnlineMetadataFetcher(private val context: Context) {
         return try {
             val json = context.assets.open("app_ratings.json").bufferedReader().use { it.readText() }
             val obj = JSONObject(json)
-            if (!obj.has(packageName)) return OnlineMetadata(null, emptyList())
+            if (!obj.has(packageName)) return OnlineMetadata(null, emptyList(), fromCache = true)
             val data = obj.getJSONObject(packageName)
             val rating = data.optDouble("rating", Double.NaN).let { if (it.isNaN()) null else it.toFloat() }
             val reviews = if (data.has("reviews")) {
                 val arr = data.getJSONArray("reviews")
                 MutableList(arr.length()) { i -> arr.getString(i) }
             } else emptyList()
-            OnlineMetadata(rating, reviews)
+            OnlineMetadata(rating, reviews, fromCache = true)
         } catch (_: Exception) {
-            OnlineMetadata(null, emptyList())
+            OnlineMetadata(null, emptyList(), fromCache = true)
         }
     }
 }
