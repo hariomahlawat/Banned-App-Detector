@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.content.pm.ApplicationInfo
 import android.net.Uri
 import android.provider.Settings
+import com.hariomahlawat.bannedappdetector.util.OnlineMetadataFetcher
+import com.hariomahlawat.bannedappdetector.util.ReviewSentimentAnalyzer
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -19,6 +21,8 @@ class PermissionScanner(private val context: Context) {
     private val permissionMap: Map<String, PermissionInfo> by lazy { loadPermissionMap() }
     private val trustedApps: List<String> by lazy { loadListFromAsset("trusted_apps.json") }
     private val chinesePublishers: List<String> by lazy { loadListFromAsset("chinese_publishers.json") }
+
+    private val metadataFetcher = OnlineMetadataFetcher()
 
     private val officialInstallers = setOf(
         "com.android.vending",
@@ -51,7 +55,15 @@ class PermissionScanner(private val context: Context) {
         val medium = app.permissions.filter { permissionMap[it]?.risk == "MEDIUM" }
         val low = app.permissions.filter { permissionMap[it]?.risk == "LOW" }
         val chinese = isChineseOrigin(app.packageName)
-        val score = computeRiskScore(high, medium, low, app.packageName, chinese)
+
+        val online = metadataFetcher.fetch(app.packageName)
+        val rating = online.rating
+        val negativeRatio = ReviewSentimentAnalyzer().negativeRatio(online.reviews)
+        val snippet = online.reviews.firstOrNull()
+
+        var score = computeRiskScore(high, medium, low, app.packageName, chinese)
+        if (rating != null && rating < 3f) score += 2
+        if (negativeRatio > 0.3f) score += (negativeRatio * 10).toInt()
 
         val background = app.permissions.filter { permissionMap[it]?.type == "PASSIVE" }
         val sideloaded = isSideloaded(app.packageName)
@@ -66,7 +78,10 @@ class PermissionScanner(private val context: Context) {
             riskScore = score,
             sideloaded = sideloaded,
             modApp = modded,
-            backgroundPermissions = background
+            backgroundPermissions = background,
+            rating = rating,
+            negativeReviewRatio = negativeRatio,
+            reviewSnippets = listOfNotNull(snippet)
         )
     }
 
@@ -163,5 +178,8 @@ data class AppRiskReport(
     val riskScore: Int,
     val sideloaded: Boolean,
     val modApp: Boolean,
-    val backgroundPermissions: List<String>
+    val backgroundPermissions: List<String>,
+    val rating: Float?,
+    val negativeReviewRatio: Float,
+    val reviewSnippets: List<String>
 )
