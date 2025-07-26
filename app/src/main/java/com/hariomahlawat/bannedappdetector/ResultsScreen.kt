@@ -61,6 +61,8 @@ import com.hariomahlawat.bannedappdetector.util.getDeviceInfo
 import com.hariomahlawat.bannedappdetector.util.saveToCache
 import com.hariomahlawat.bannedappdetector.util.setSystemBars
 import com.hariomahlawat.bannedappdetector.util.shareImage
+import com.hariomahlawat.bannedappdetector.util.withLabel
+import com.hariomahlawat.bannedappdetector.ShareNameDialog
 import java.text.DateFormat
 import java.util.Date
 
@@ -76,6 +78,7 @@ fun ResultsScreen(
     val context = LocalContext.current
     val view = LocalView.current
     val device = getDeviceInfo(context)
+    var showShareDialog by remember { mutableStateOf(false) }
 
     setSystemBars(
         color = if (dark) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
@@ -112,11 +115,7 @@ fun ResultsScreen(
                     },
                     actions = {
                         IconButton(
-                            onClick = {
-                                view.drawToBitmap()
-                                    .saveToCache(context)
-                                    .let { shareImage(context, it) }
-                            }
+                            onClick = { showShareDialog = true }
                         ) {
                             Icon(
                                 painter = painterResource(android.R.drawable.ic_menu_share),
@@ -141,6 +140,18 @@ fun ResultsScreen(
                         .padding(bottom = 12.dp)
                 )
             }
+        }
+        if (showShareDialog) {
+            ShareNameDialog(
+                onDismiss = { showShareDialog = false },
+                onShare = { name ->
+                    showShareDialog = false
+                    view.drawToBitmap()
+                        .withLabel(context, name)
+                        .saveToCache(context)
+                        .let { shareImage(context, it) }
+                }
+            )
         }
     }
 }

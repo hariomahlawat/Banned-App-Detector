@@ -4,10 +4,48 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.Typeface
+import android.graphics.Color
 import androidx.core.content.FileProvider
 import androidx.core.view.drawToBitmap
 import java.io.File
 import java.io.FileOutputStream
+
+/** Return a copy of this bitmap with the provided label drawn in the bottom
+ *  left corner. Used when sharing screenshots so the receiver can identify
+ *  who sent it. */
+fun Bitmap.withLabel(context: Context, label: String): Bitmap {
+    val copy = copy(config ?: Bitmap.Config.ARGB_8888, true)
+    val canvas = Canvas(copy)
+
+    val dm = context.resources.displayMetrics
+    val padding = (8 * dm.density).toInt()
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        textSize = 14f * dm.scaledDensity
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+    }
+    val bgPaint = Paint().apply { color = Color.argb(160, 0, 0, 0) }
+
+    val bounds = Rect()
+    paint.getTextBounds(label, 0, label.length, bounds)
+    val x = padding
+    val y = copy.height - padding
+
+    canvas.drawRect(
+        (x - padding).toFloat(),
+        (y - bounds.height() - padding).toFloat(),
+        (x + bounds.width() + padding).toFloat(),
+        (y + padding).toFloat(),
+        bgPaint
+    )
+    canvas.drawText(label, x.toFloat(), y.toFloat(), paint)
+
+    return copy
+}
 
 /** Save the bitmap to a cache file and return its content Uri */
 fun Bitmap.saveToCache(context: Context): Uri {
